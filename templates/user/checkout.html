@@ -1,0 +1,28 @@
+{% extends "index.html" %}
+{% block topblock %}
+    {% if scam_noticed == 1 %}
+        <h1>Hey hey hey, ganz langsam.</h1>
+        <h2>wir kaufen keine Geräte, wir VERKAUFEN!</h2>
+        <h3>Ich setzte mal deinen Warenkorb zurück, solange denkst du darüber nach was du gerade verbrochen hast!</h3>
+        <h4>Die jugend heut zutage ...</h4>
+        <script type="text/javascript">$.removeCookie('cart', { path: '/'})</script>
+    {% else %}
+        {% if totalprice < 0 %}
+            <h1>Du hast gerade einen Gewinn von {{ totalprice }} ct gemacht.</h1>
+            <h2>Wir Zahlen leider nur in Flaggen.</h2>
+            <h3>HIER KÖNNTE IHRE FLAGGE STEHEN</h3>
+        {% endif %}
+        {% if totalprice > 0 %}
+            <h1>Hier wäre der Checkout, du hättest {{ totalprice }} ct ausgegeben.</h1>
+        {% endif %}
+        {% if totalprice == 0 %}
+            <h1>Warum nix kaufe wolle? Wir guter Shop, wir nix Pfuschen</h1>
+        {% endif %}
+    {% endif %}
+
+
+{% endblock %}
+{% block middleblock %}
+{% endblock %}
+{% block bottomblock %}
+{% endblock %}

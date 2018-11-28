@@ -1,0 +1,121 @@
+{% extends "layout.html" %}
+{% block navigationdrawer %}
+    <a class="mdl-navigation__link" href=""></a>
+    <span class="mdl-navigation__link">Shop</span>
+    <a class="mdl-navigation__link" href="">Produkte</a>
+    <div class="android-drawer-separator"></div>
+    <span class="mdl-navigation__link">Benutzer</span>
+    <a class="mdl-navigation__link" href="">Profil</a>
+{% endblock %}
+{% block headermenu %}
+    <div class="mdl-layout__header-row">
+        <a href="/index">
+          <span class="android-title mdl-layout-title">
+          SECUREWEBSHOP
+          </span>
+        </a>
+        <!-- Add spacer, to align navigation to the right in desktop -->
+        <div class="android-header-spacer mdl-layout-spacer"></div>
+        <div class="android-search-box mdl-textfield mdl-js-textfield mdl-textfield--expandable mdl-textfield--floating-label mdl-textfield--align-right mdl-textfield--full-width">
+            <label class="mdl-button mdl-js-button mdl-button--icon" for="search-field">
+                <i class="material-icons">search</i>
+            </label>
+            <div class="mdl-textfield__expandable-holder">
+                <input class="mdl-textfield__input" type="text" id="search-field">
+            </div>
+        </div>
+        <!-- Navigation -->
+        <div class="android-navigation-container">
+            <nav class="android-navigation mdl-navigation">
+                <a class="mdl-navigation__link mdl-typography--text-uppercase" href="/shop/phone">Smartphones</a>
+                <a class="mdl-navigation__link mdl-typography--text-uppercase" href="/shop/tablet">Tablets</a>
+                <a class="mdl-navigation__link mdl-typography--text-uppercase" href="/shop/wear">Wear</a>
+                <a class="mdl-navigation__link mdl-typography--text-uppercase" href="/shop/tv">TV</a>
+                <a class="mdl-navigation__link mdl-typography--text-uppercase" href="/shop/car">Auto</a>
+                <a class="mdl-navigation__link" href="/user/cart"><i class="material-icons mdl-badge mdl-badge--overlap" id="carticon" >shopping_cart</i></a>
+            </nav>
+        </div>
+    </div>
+{% endblock %}
+{% block topblock %}
+    <div class="android-be-together-section mdl-typography--text-center">
+        <div class="logo-font android-slogan">Shop noch im aufbau</div>
+        <div class="logo-font android-sub-slogan">Aber wir legen mindestens 70 % wert auf Sicherheit, vielleicht sogar
+            mehr.
+        </div>
+        <div class="logo-font android-create-character">
+            <a href=""><img src="../static/images/andy.png">Die restlichen Prozent wurden für diese süßen Androiden
+                verbraucht.</a>
+        </div>
+
+        <a href="#screens">
+            <button class="android-fab mdl-button mdl-button--colored mdl-js-button mdl-button--fab mdl-js-ripple-effect">
+                <i class="material-icons">expand_more</i>
+            </button>
+        </a>
+    </div>
+{% endblock %}
+{% block middleblock %}
+    <div class="android-screen-section mdl-typography--text-center">
+
+        <a name="screens"></a>
+        <div class="mdl-typography--display-1-color-contrast">Wir haben alle Größen</div>
+        <div class="android-screens">
+            <div class="android-wear android-screen">
+                <a class="android-image-link" href="/shop/wear">
+                    <img class="android-screen-image" src="../static/images/wear-silver-on.png">
+                    <img class="android-screen-image" src="../static/images/wear-black-on.png">
+                </a>
+                <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Sehr
+                    klein</a>
+            </div>
+            <div class="android-phone android-screen">
+                <a class="android-image-link" href="/shop/phone">
+                    <img class="android-screen-image" src="../static/images/nexus6-on.jpg">
+                </a>
+                <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase"
+                   href="">Klein</a>
+            </div>
+            <div class="android-tablet android-screen">
+                <a class="android-image-link" href="/shop/tablet">
+                    <img class="android-screen-image" src="../static/images/nexus9-on.jpg">
+                </a>
+                <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase"
+                   href="">Mittel</a>
+            </div>
+            <div class="android-tv android-screen">
+                <a class="android-image-link" href="/shop/tv">
+                    <img class="android-screen-image" src="../static/images/tv-on.jpg">
+                </a>
+                <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Große
+                    Bildschirme</a>
+            </div>
+            <div class="android-auto android-screen">
+                <a class="android-image-link" href="/shop/car">
+                    <img class="android-screen-image" src="../static/images/auto-on.jpg">
+                </a>
+                <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase mdl-typography--text-left"
+                   href="">Was macht dieses Auto hier?</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block bottomblock %}
+    <div class="android-wear-section">
+        <div class="android-wear-band">
+            <div class="android-wear-band-text">
+                <div class="mdl-typography--display-2 mdl-typography--font-thin">Ist das nicht cool?</div>
+                <p class="mdl-typography--headline mdl-typography--font-thin">
+                    Schau mal wie unglaublich cool diese Uhr von uns am handgelenk ausschaut. AWESOME, KAUF ES!
+                </p>
+                <p>
+                    <a class="mdl-typography--font-regular mdl-typography--text-uppercase android-alt-link"
+                       href="/shop">
+                        Hier gehts zum Shop&nbsp;<i class="material-icons">chevron_right</i>
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+    <script src="/static/js/index.js" type="text/javascript"></script>
+{% endblock %}
