@@ -1,33 +1,41 @@
 {% extends "index.html" %}
 {% block topblock %}
-    <table class="mdl-data-table mdl-js-data-table mdl-shadow--4dp center">
-        <thead>
-        <tr>
-            <th>Position</th>
-            <th class="mdl-data-table__cell--non-numeric">Name</th>
-            <th>Quantität</th>
-            <th>Einzel-Preis</th>
-            <th>Gesamt-Preis</th>
-            <th>Entfernen</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for i, name, quantity, sprice, mprice in items %}
+    <div>
+        <table class="mdl-data-table mdl-js-data-table mdl-shadow--4dp center">
+            <thead>
             <tr>
-                <td>{{ i }}</td>
-                <td class="mdl-data-table__cell--non-numeric">{{ name }}</td>
-                <td>{{ quantity }}</td>
-                <td>{{ sprice }}</td>
-                <td>{{ mprice }}</td>
-                <td>
-                    <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored deletebutton" data-position="{{ i }}">
-                        <i class="material-icons">delete</i>
-                    </button>
-                </td>
+                <th>Position</th>
+                <th class="mdl-data-table__cell--non-numeric">Name</th>
+                <th>Quantität</th>
+                <th>Einzel-Preis</th>
+                <th>Gesamt-Preis</th>
+                <th>Entfernen</th>
             </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+            {% for i, name, quantity, sprice, mprice in items %}
+                <tr>
+                    <td>{{ i }}</td>
+                    <td class="mdl-data-table__cell--non-numeric" data-id="{{ i }}">{{ name }}</td>
+                    <td>{{ quantity }}</td>
+                    <td>{{ sprice }} ct</td>
+                    <td>{{ mprice }} ct</td>
+                    <td>
+                        <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored deletebutton"
+                                data-position="{{ i }}">
+                            <i class="material-icons">delete</i>
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <a class="center flex" href="/user/checkout">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent center">
+                Zum Bezahlvorgang
+            </button>
+        </a>
+    </div>
 {% endblock %}
 {% block middleblock %}
 {% endblock %}

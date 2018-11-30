@@ -1,3 +1,5 @@
+import hashlib
+
 from flask import *
 from flask_session import Session
 import pylibmc
@@ -11,19 +13,23 @@ from wtforms import Form, BooleanField, StringField, PasswordField, validators, 
 
 import flask_debugtoolbar, pytest, pytest_cov, wtforms_components, json, urllib, string, sqlite3, random
 
-# secure / unsecure variables
+# secure / insecure variables
 itemtype_handling = "secure"
 cart_negative_quantity_handling = "secure"
+user_id_handling = "secure"
+sql_injection_login = "secure"
+email_template_handling = "secure"
 
 # flask variables
 app = Flask(__name__)
 app.debug = True
 app.config['SECRET_KEY'] = 'oqpi23z9q82z3qr9823zh9oq82zhroq289zhrrrr29r'
+app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 toolbar = flask_debugtoolbar.DebugToolbarExtension(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
-login_manager.login_message = 'Nur als registrierter User möglich.'
+login_manager.login_message = 'Nur als registrierter Nutzer möglich.'
 SELF = "'self'"
 INLINE = "'unsafe-inline'"
 EVAL = "'unsafe-eval'"
@@ -61,7 +67,7 @@ def gen_user(name, passwd):
     salt = ''.join((random.choice(chars)) for x in range(size))
     pw_hash = sha256_crypt.encrypt(passwd + salt)
     cursor = get_cursor()
-    cursor.execute('INSERT INTO user (name, password, salt) VALUES (?, ?, ?)', [name, pw_hash, salt])
+    cursor.execute('INSERT INTO user (name, password, salt, secure_id) VALUES (?, ?, ?, ?)', [name, pw_hash, salt, salt])
     return cursor.lastrowid
 
 
@@ -73,21 +79,51 @@ def insecure__get_id_for_name(name):
 
 def secure__get_id_for_name(name):
     cursor = get_cursor()
-    cursor.execute('SELECT secure_id FROM user WHERE name = ?', [name])
-    return cursor.fetchall()[0][0]
-
-
-def scure__check_pw_insecure_id(id, pw):
-    cursor = get_cursor()
-    cursor.execute('SELECT password FROM user WHERE insecure_id = ?', [id])
+    cursor.execute('SELECT secure_id FROM user WHERE name like ?', [name])
     try:
-        pw_hash = cursor.fetchall()[0][0]
-    except IndexError:
+        secureid = cursor.fetchall()[0][0]
+    except IndexError as e:
+        print(e.__str__())
+        return -1
+    return secureid
+
+
+# def secure__check_pw_insecure_id(id, pw):
+#     cursor = get_cursor()
+#     cursor.execute('SELECT password FROM user WHERE insecure_id = ?', [id])
+#     try:
+#         pw_hash = cursor.fetchall()[0][0]
+#     except IndexError:
+#         return False
+#     return sha256_crypt.verify(pw + id, pw_hash)
+
+
+def check_pw_secure_id(id, pw):
+    if sql_injection_login == "secure":
+        return secure__check_pw_secure_id(id, pw)
+    elif sql_injection_login == "insecure":
+        return insecure__check_pw_secure_id(id, pw)
+    return None
+
+
+def insecure__check_pw_secure_id(id, pw):
+    cursor = get_cursor()
+    pwhash = hashlib.md5()
+    pwhash.update(pw.encode('utf-8'))
+    compare = pwhash.digest()
+    compare = str(compare)
+    compare = compare[2:-1]
+    # compare = compare[:-1]
+    sqlstring = """SELECT insecure_id from user WHERE secure_id = '""" + id + """' AND pw_md5 = '""" + compare + """'"""
+    cursor.execute(sqlstring)
+    try:
+        cursor.fetchall()[0]
+    except IndexError as e:
         return False
-    return sha256_crypt.verify(pw + id, pw_hash)
+    return True
 
 
-def scure__check_pw_secure_id(id, pw):
+def secure__check_pw_secure_id(id, pw):
     cursor = get_cursor()
     cursor.execute('SELECT password FROM user WHERE secure_id = ?', [id])
     try:
@@ -97,24 +133,28 @@ def scure__check_pw_secure_id(id, pw):
     return sha256_crypt.verify(pw + id, pw_hash)
 
 
-def scure__check_pw_name(name, pw):
-    cursor = get_cursor()
-    cursor.execute('SELECT insecure_id, password FROM user WHERE name = ?', [name])
-    result = cursor.fetchall()
-    try:
-        id = result[0][0]
-        pw_hash = result[0][1]
-    except IndexError:
-        return False
-    return sha256_crypt.verify(pw + id, pw_hash)
+# def secure__check_pw_name(name, pw):
+#     cursor = get_cursor()
+#     cursor.execute('SELECT insecure_id, password FROM user WHERE name = ?', [name])
+#     result = cursor.fetchall()
+#     try:
+#         id = result[0][0]
+#         pw_hash = result[0][1]
+#     except IndexError:
+#         return False
+#     return sha256_crypt.verify(pw + id, pw_hash)
 
 
 class User(UserMixin):
     @classmethod
     def get_user_instance(cls, id):
         cursor = get_cursor()
-        cursor.execute('SELECT name, first_name, last_name, adress, mail FROM user WHERE insecure_id = ?', [id])
-        result = cursor.fetchall()[0]
+        cursor.execute('SELECT name, first_name, last_name, adress, mail FROM user WHERE secure_id = ?', [id])
+        result = []
+        try:
+            result = cursor.fetchall()[0]
+        except IndexError as e:
+            return None
         name = result[0]
         firstname = result[1]
         lastname = result[2]
@@ -143,28 +183,83 @@ class LoginForm(Form):
     username = StringField('Name', [
         validators.DataRequired(),
         validators.Length(min=4, max=25)
+    ], id='username')
+    password = PasswordField('Passwort', [
+        validators.DataRequired(),
+        validators.Length(min=8)
+    ], id='password')
+    remember = BooleanField('Eingelogged bleiben')
+
+
+class CompleteUserForm(Form):
+    username = StringField('Name', [
+        validators.DataRequired(),
+        validators.Length(min=4, max=25)
     ])
     password = PasswordField('Password', [
         validators.DataRequired(),
         validators.Length(min=8)
     ])
-    remember = BooleanField('Eingelogged bleiben')
+    first_name = StringField("Vorname")
+    last_name = StringField("Nachname")
+    mail = StringField('E-Mail Adresse')
+    adress = StringField('Adresse')
+    insecure_id = IntegerField('insecure_id')
+
+
+@app.route('/user/profile', methods=['GET', 'POST'])
+@login_required
+def userprofile():
+    form = CompleteUserForm(request.form)
+    if request.method == 'POST':
+        save_profile(form)
+    if email_template_handling == "insecure":
+        emailstring = render_template_string("nice email: " + current_user.mail)
+    else:
+        emailstring = render_template_string("nice email: {{ current_user.mail }}")
+    return render_template("user/profile.html", form=form, emailstring=emailstring)
+
+
+def save_profile(form):
+    cursor = get_cursor()
+    cursor.execute("UPDATE user SET "
+                   "name = ?,"
+                   "mail = ?,"
+                   "first_name = ?,"
+                   "last_name = ?,"
+                   "adress = ?"
+                   "WHERE insecure_id = ?",
+                   [
+                       form.username.data,
+                       form.mail.data,
+                       form.first_name.data,
+                       form.last_name.data,
+                       form.adress.data,
+                       form.insecure_id.data
+                   ])
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    form = LoginForm()
-    if form.validate_on_submit():
+    form = LoginForm(request.form)
+    if request.method == "POST" and form.validate():
         id = secure__get_id_for_name(form.username.data)
         user = User.get_user_instance(id)
-        if user is None or not scure__check_pw_secure_id(id=id, pw=form.password.data):
+        if user is None or not check_pw_secure_id(id=id, pw=form.password.data):
             flash('Name oder Passwort sind falsch.')
             return redirect(url_for('login'))
-        login_user(user, remember=form.remember_me.data)
+        login_user(user, remember=form.remember.data)
         return redirect(url_for('index'))
-    return render_template('login.html', title='Sign In', form=form)
+    return render_template('user/login.html', title='Sign In', form=form)
+
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 
 @app.route('/index')
@@ -218,7 +313,6 @@ def create_cart_table(dictcart):
 def show_cart():
     dictcart = reformat_cart()
     result = create_cart_table(dictcart)
-
     return render_template("user/cart.html", items=result)
 
 
@@ -268,18 +362,13 @@ def insecure__checkout():
 
 
 @app.route('/user/checkout')
+@login_required
 def checkout():
     if cart_negative_quantity_handling == "secure":
         return secure__checkout()
     elif cart_negative_quantity_handling == "insecure":
         return insecure__checkout()
     return None
-
-
-@app.route('/user/profile')
-def userprofile():
-    cursor = get_cursor()
-    cursor.execute("SELECT name, first_name, last_name, mail, adress FROM user where ")
 
 
 def get_item_by_type(itemtype):
@@ -310,3 +399,6 @@ def loosen_secret_key():
 
 if __name__ == '__main__':
     app.run()
+
+
+"Unicode-objects must be encoded before hashing".encode("utf-8")

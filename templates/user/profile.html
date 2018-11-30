@@ -1,0 +1,58 @@
+{% extends "index.html" %}
+{% from "form_template/_formhelpers.html" import render_current_user_adress, render_current_user_first_name, render_current_user_last_name, render_current_user_mail, render_current_user_name, render_csrf_protect %}
+{% block topblock %}
+    <div class="mdl-card mdl-shadow--2dp card__v-profile">
+        <form action="/user/profile" method="post">
+            <div class="mdl-card__title">
+                <h4 class="mdl-card__title-text">Profil</h4>
+            </div>
+            <div class="mdl-card__supporting-text">
+                {{ render_current_user_mail(form.mail, value=current_user.mail) }}
+                {{ render_current_user_name(form.username, value=current_user.name) }}
+                {{ render_current_user_first_name(form.username, value=current_user.first_name) }}
+                {{ render_current_user_last_name(form.last_name, value=current_user.last_name) }}
+                {{ render_current_user_adress(form.adress, value=current_user.adress) }}
+                {{ render_csrf_protect() }}
+                <button id="confirm_mail" type="button"
+                        class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp show-modal">
+                    E-Mail Bestätigen
+                </button>
+                <a href="/user/profile/password-change">
+                    <button id="change_pw" type="button"
+                            class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp">
+                        Passwort ändern
+                    </button>
+                </a>
+            </div>
+            <div class="mdl-card__actions">
+                <button id="profile-save"
+                        class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp"
+                        value="{{ current_user.id }}">Save
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <dialog class="mdl-dialog">
+        <div class="mdl-dialog__content">
+            <p>
+                Hier würde eigentlich eine Emailüberprüfung stehen.
+            </p>
+            <p>
+                Diese ist noch nicht implementiert.
+            </p>
+            <p>
+                {{ emailstring }}
+            </p>
+        </div>
+        <div class="mdl-dialog__actions mdl-dialog__actions--full-width">
+            <button type="button" class="mdl-button close">Agree</button>
+        </div>
+    </dialog>
+
+{% endblock %}
+{% block middleblock %}
+{% endblock %}
+{% block bottomblock %}
+    <script src="/static/js/profile.js" type="text/javascript"></script>
+{% endblock %}

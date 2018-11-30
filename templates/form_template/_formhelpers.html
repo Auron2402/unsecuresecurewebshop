@@ -1,0 +1,94 @@
+{% macro render_textfield(field) %}
+    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        {{ field(class_='mdl-textfield__input', id=field.id, **kwargs)|safe }}
+        {{ field.label(class_='mdl-textfield__label', for=field.id, **kwargs)|safe }}
+    </div>
+    {% if field.errors %}
+        <ul class=errors>
+            {% for error in field.errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_userfield(field) %}
+    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        {{ field(class_='mdl-textfield__input', type_='text', id=field.id, **kwargs) }}
+        {{ field.label(class_='mdl-textfield__label', for_=field.id, **kwargs) }}
+    </div>
+{% endmacro %}
+
+{% macro render_checkbox(field) %}
+    <label class="mdl-switch mdl-js-switch mdl-js-ripple-effect" for="{{ field.id }}">
+        {{ field(class_='mdl-switch__input', type_='checkbox', **kwargs)|safe }}
+        <span class="mdl-switch__label">{{ field.label }}</span>
+    </label>
+{% endmacro %}
+
+
+{% macro render_numberfield(field) %}
+    <div class="mdl-textfield mdl-js-textfield">
+        {{ field(class_='mdl-textfield__input', pattern_='-?[0-9]*(\.[0-9]+)?', **kwargs)|safe }}
+        {{ field.label(class_='mdl-textfield__label') }}
+        <span class="mdl-textfield__error">Eingabe ist keine Zahl!</span>
+    </div>
+    {% if field.errors %}
+        <ul class=errors>
+            {% for error in field.errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endmacro %}
+
+{% macro render_csrf_protect() %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+{% endmacro %}
+
+{% macro render_current_user_name(field) %}
+    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        {{ field(class_='mdl-textfield__input', type_='text', id_="v-name", pattern_="[A-Z,a-z,0-9, ]*",
+            **kwargs)|safe }}
+        {{ field.label(class_="mdl-textfield__label", for_="v-name") }}
+        <span class="mdl-textfield__error">Nur Buchstaben, Zahlen und Leertasten</span>
+    </div>
+{% endmacro %}
+
+{% macro render_current_user_first_name(field) %}
+    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        {{ field(class_='mdl-textfield__input', type_='text', id_="v-firstname", pattern_="[A-Z,a-z, ]*",
+            **kwargs)|safe }}
+        {{ field.label(class_="mdl-textfield__label", for_="v-firstname") }}
+        <span class="mdl-textfield__error">Nur Buchstaben</span>
+    </div>
+{% endmacro %}
+
+{% macro render_current_user_last_name(field) %}
+    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        {{ field(class_='mdl-textfield__input', type_='text', id_="v-lastname", pattern_="[A-Z,a-z, ]*",
+            **kwargs)|safe }}
+        {{ field.label(class_="mdl-textfield__label", for_="v-lastname") }}
+        <span class="mdl-textfield__error">Nur Buchstaben</span>
+    </div>
+{% endmacro %}
+
+{% macro render_current_user_mail(field) %}
+    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        {{ field(class_='mdl-textfield__input', type_='text', id_="v-mail", pattern_=".*@[a-z]*\.[a-z]*",
+            **kwargs)|safe }}
+        {{ field.label(class_="mdl-textfield__label", for_="v-mail") }}
+        <span class="mdl-textfield__error">Das sieht nicht nach eiener gültigen Email aus</span>
+    </div>
+{% endmacro %}
+
+{% macro render_current_user_adress(field) %}
+    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+        {{ field(class_='mdl-textfield__input', type_='text', id_="v-adress", pattern_="[A-Z,a-z,0-9, ]*",
+            **kwargs)|safe }}
+        {{ field.label(class_="mdl-textfield__label", for_="v-adress", **kwargs)|safe }}
+        <span class="mdl-textfield__error">Nur Buchstaben Zahlen und Leertasten</span>
+    </div>
+{% endmacro %}
+
+{#<input type="hidden" class="csrftoken" name="csrf_token" value="{{ csrf_token() }}" data-csrf="{{ csrf_token() }}"/>#}
