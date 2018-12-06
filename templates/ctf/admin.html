@@ -1,0 +1,133 @@
+{% extends "index.html" %}
+{% block topblock %}
+{% from "form_template/_formhelpers.html" import render_textfield, render_csrf_protect, render_checkbox, render_userfield %}
+<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header
+            mdl-layout--fixed-tabs">
+    <header class="mdl-layout__header">
+        <!-- Tabs -->
+        <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
+            <a href="#fixed-tab-1" class="mdl-layout__tab is-active">CTF SETTINGS</a>
+            <a href="#fixed-tab-2" class="mdl-layout__tab">User Editor</a>
+        </div>
+    </header>
+    <main class="mdl-layout__content">
+        <section class="mdl-layout__tab-panel is-active" id="fixed-tab-1">
+            <div class="page-content">
+                <table class="mdl-data-table mdl-js-data-table">
+                    <thead>
+                    <tr>
+                        <th class="mdl-data-table__cell--non-numeric">Risikofaktor</th>
+                        <th class="mdl-data-table__cell--non-numeric">Handling</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for mode, value in sec_settings.items() %}
+                        <tr>
+                            <td class="mdl-data-table__cell--non-numeric">{{ mode }}</td>
+                            <td class="mdl-data-table__cell--non-numeric">
+                                <button type="button"
+                                        class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored admin-change-handling"
+                                        data-mode="{{ mode }}" id="{{ mode }}-button"> {{ value }}
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <section class="mdl-layout__tab-panel" id="fixed-tab-2">
+            <div class="page-content">
+                <div>
+                    <table class="mdl-data-table mdl-js-data-table fullwidth">
+                        <thead>
+                        <tr>
+                            <th class="">Insecure ID</th>
+                            <th class="mdl-data-table__cell--non-numeric">Name</th>
+                            <th class="mdl-data-table__cell--non-numeric">Mail</th>
+                            <th class="mdl-data-table__cell--non-numeric">First Name</th>
+                            <th class="mdl-data-table__cell--non-numeric">Last Name</th>
+                            <th class="mdl-data-table__cell--non-numeric">Adress</th>
+                            <th class="mdl-data-table__cell--non-numeric">Secure ID</th>
+                            <th class="mdl-data-table__cell--non-numeric">Role</th>
+                            <th class="mdl-data-table__cell--non-numeric">Buttons</th>
+
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for insecureid, name, mail, first_name, last_name, adress, secure_id, role in data %}
+                            <tr>
+                                <td class="">{{ insecureid }}</td>
+                                <td class="mdl-data-table_cell--non-numeric">{{ name }}</td>
+                                <td class="mdl-data-table_cell--non-numeric">{{ mail }}</td>
+                                <td class="mdl-data-table_cell--non-numeric">{{ first_name }}</td>
+                                <td class="mdl-data-table_cell--non-numeric">{{ last_name }}</td>
+                                <td class="mdl-data-table_cell--non-numeric">{{ adress }}</td>
+                                <td class="mdl-data-table_cell--non-numeric">{{ secure_id }}</td>
+                                <td class="mdl-data-table_cell--non-numeric">{{ role }}</td>
+                                <td class="mdl-data-table_cell--non-numeric">
+                                    {#                                <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored admin-save-button"#}
+                                    {#                                        data-id="{{ secure_id }}">#}
+                                    {#                                    <i class="material-icons">save</i>#}
+                                    {#                                </button>#}
+                                    <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored admin-delete-button"
+                                            data-id="{{ secure_id }}">
+                                        <i class="material-icons">delete</i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <div id="mycard">
+
+                        <div class="demo-card-wide mdl-card mdl-shadow--2dp">
+                            <div class="mdl-card__title">
+                                <h2 class="mdl-card__title-text">Nutzer erstellen</h2>
+                            </div>
+
+
+                            <div class="mdl-card__supporting-text">
+                                Bitte möglichst alle Felder ausfüllen
+                                <form action="/ctf/admin" method="post">
+                                    <div id="name">
+                                        {{ render_textfield(form.first_name) }}
+                                        {{ render_textfield(form.last_name) }}
+                                    </div>
+                                    <div id="userdata">
+                                        {{ render_textfield(form.username) }}
+                                        {{ render_textfield(form.password) }}
+                                    </div>
+                                    <div id="adresses">
+                                        {{ render_textfield(form.adress) }}
+                                        {{ render_textfield(form.mail) }}
+                                    </div>
+                                    <div id="role">
+                                        {{ render_textfield(form.role) }}
+                                        {{ render_csrf_protect() }}
+                                    </div>
+                                    <div id="next">
+                                        <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect">
+                                            <i class="material-icons">arrow_forward</i>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+{% endblock %}
+{% block middleblock %}
+{% endblock %}
+{% block bottomblock %}
+    <script src="/static/js/admin.js" type="text/javascript"></script>
+{% endblock %}

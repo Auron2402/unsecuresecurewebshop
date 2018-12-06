@@ -18,8 +18,8 @@
                     <td>{{ i }}</td>
                     <td class="mdl-data-table__cell--non-numeric" data-id="{{ i }}">{{ name }}</td>
                     <td>{{ quantity }}</td>
-                    <td>{{ sprice }} ct</td>
-                    <td>{{ mprice }} ct</td>
+                    <td>{{ format_price(sprice) }}</td>
+                    <td>{{ format_price(mprice) }}</td>
                     <td>
                         <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-button--colored deletebutton"
                                 data-position="{{ i }}">

@@ -460,4 +460,7 @@ a .android-title {
 .android-content {
   min-height: calc(100vh - 200px);
 }
+.mdl-dialog {
+  width: 750px;
+}
 /*# sourceMappingURL=custom_styles.css.map */
