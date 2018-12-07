@@ -11,133 +11,158 @@
     <collation id="3" parent="1" name="BINARY"/>
     <collation id="4" parent="1" name="NOCASE"/>
     <collation id="5" parent="1" name="RTRIM"/>
-    <table id="6" parent="2" name="items"/>
-    <table id="7" parent="2" name="sqlite_master">
+    <table id="6" parent="2" name="flag"/>
+    <table id="7" parent="2" name="items"/>
+    <table id="8" parent="2" name="sqlite_master">
       <System>1</System>
     </table>
-    <table id="8" parent="2" name="sqlite_sequence">
+    <table id="9" parent="2" name="sqlite_sequence">
       <System>1</System>
     </table>
-    <table id="9" parent="2" name="user"/>
-    <table id="10" parent="2" name="user_cart"/>
-    <column id="11" parent="6" name="id">
+    <table id="10" parent="2" name="user"/>
+    <table id="11" parent="2" name="user_cart"/>
+    <column id="12" parent="6" name="id">
       <Position>1</Position>
       <DataType>INTEGER|0s</DataType>
       <NotNull>1</NotNull>
       <SequenceIdentity>1</SequenceIdentity>
     </column>
-    <column id="12" parent="6" name="name">
+    <column id="13" parent="6" name="flag">
       <Position>2</Position>
-      <DataType>varchar|0s</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <column id="13" parent="6" name="filename">
-      <Position>3</Position>
-      <DataType>varchar|0s</DataType>
-    </column>
-    <column id="14" parent="6" name="price">
-      <Position>4</Position>
       <DataType>int|0s</DataType>
-      <NotNull>1</NotNull>
     </column>
-    <column id="15" parent="6" name="type">
-      <Position>5</Position>
-      <DataType>varchar|0s</DataType>
-      <NotNull>1</NotNull>
-    </column>
-    <index id="16" parent="6" name="items_id_uindex">
+    <index id="14" parent="6" name="flag_id_uindex">
       <ColNames>id</ColNames>
       <ColumnCollations></ColumnCollations>
       <Unique>1</Unique>
     </index>
-    <key id="17" parent="6" name="items_pk">
+    <key id="15" parent="6" name="flag_pk">
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
+      <UnderlyingIndexName>flag_id_uindex</UnderlyingIndexName>
+    </key>
+    <column id="16" parent="7" name="id">
+      <Position>1</Position>
+      <DataType>INTEGER|0s</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>1</SequenceIdentity>
+    </column>
+    <column id="17" parent="7" name="name">
+      <Position>2</Position>
+      <DataType>varchar|0s</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="18" parent="7" name="filename">
+      <Position>3</Position>
+      <DataType>varchar|0s</DataType>
+    </column>
+    <column id="19" parent="7" name="price">
+      <Position>4</Position>
+      <DataType>int|0s</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="20" parent="7" name="type">
+      <Position>5</Position>
+      <DataType>varchar|0s</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <index id="21" parent="7" name="items_id_uindex">
+      <ColNames>id</ColNames>
+      <ColumnCollations></ColumnCollations>
+      <Unique>1</Unique>
+    </index>
+    <key id="22" parent="7" name="items_pk">
       <ColNames>id</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>items_id_uindex</UnderlyingIndexName>
     </key>
-    <column id="18" parent="7" name="type">
+    <column id="23" parent="8" name="type">
       <Position>1</Position>
       <DataType>text|0s</DataType>
     </column>
-    <column id="19" parent="7" name="name">
+    <column id="24" parent="8" name="name">
       <Position>2</Position>
       <DataType>text|0s</DataType>
     </column>
-    <column id="20" parent="7" name="tbl_name">
+    <column id="25" parent="8" name="tbl_name">
       <Position>3</Position>
       <DataType>text|0s</DataType>
     </column>
-    <column id="21" parent="7" name="rootpage">
+    <column id="26" parent="8" name="rootpage">
       <Position>4</Position>
       <DataType>int|0s</DataType>
     </column>
-    <column id="22" parent="7" name="sql">
+    <column id="27" parent="8" name="sql">
       <Position>5</Position>
       <DataType>text|0s</DataType>
     </column>
-    <column id="23" parent="8" name="name">
+    <column id="28" parent="9" name="name">
       <Position>1</Position>
     </column>
-    <column id="24" parent="8" name="seq">
+    <column id="29" parent="9" name="seq">
       <Position>2</Position>
     </column>
-    <column id="25" parent="9" name="insecure_id">
+    <column id="30" parent="10" name="insecure_id">
       <Position>1</Position>
       <DataType>INTEGER|0s</DataType>
       <NotNull>1</NotNull>
       <SequenceIdentity>1</SequenceIdentity>
     </column>
-    <column id="26" parent="9" name="name">
+    <column id="31" parent="10" name="name">
       <Position>2</Position>
       <DataType>varchar|0s</DataType>
     </column>
-    <column id="27" parent="9" name="password">
+    <column id="32" parent="10" name="password">
       <Position>3</Position>
       <DataType>varchar|0s</DataType>
     </column>
-    <column id="28" parent="9" name="salt">
+    <column id="33" parent="10" name="salt">
       <Position>4</Position>
       <DataType>varchar|0s</DataType>
     </column>
-    <column id="29" parent="9" name="mail">
+    <column id="34" parent="10" name="mail">
       <Position>5</Position>
       <DataType>varchar|0s</DataType>
     </column>
-    <column id="30" parent="9" name="first_name">
+    <column id="35" parent="10" name="first_name">
       <Position>6</Position>
       <DataType>varchar|0s</DataType>
     </column>
-    <column id="31" parent="9" name="last_name">
+    <column id="36" parent="10" name="last_name">
       <Position>7</Position>
       <DataType>varchar|0s</DataType>
     </column>
-    <column id="32" parent="9" name="adress">
+    <column id="37" parent="10" name="adress">
       <Position>8</Position>
       <DataType>varchar|0s</DataType>
     </column>
-    <column id="33" parent="9" name="secure_id">
+    <column id="38" parent="10" name="secure_id">
       <Position>9</Position>
       <DataType>int|0s</DataType>
     </column>
-    <column id="34" parent="9" name="pw_md5">
+    <column id="39" parent="10" name="pw_md5">
       <Position>10</Position>
       <DataType>varchar|0s</DataType>
     </column>
-    <index id="35" parent="9" name="user_id_uindex">
+    <column id="40" parent="10" name="role">
+      <Position>11</Position>
+      <DataType>varchar|0s</DataType>
+    </column>
+    <index id="41" parent="10" name="user_id_uindex">
       <ColNames>insecure_id</ColNames>
       <ColumnCollations></ColumnCollations>
       <Unique>1</Unique>
     </index>
-    <key id="36" parent="9" name="user_pk">
+    <key id="42" parent="10" name="user_pk">
       <ColNames>insecure_id</ColNames>
       <Primary>1</Primary>
       <UnderlyingIndexName>user_id_uindex</UnderlyingIndexName>
     </key>
-    <column id="37" parent="10" name="userid">
+    <column id="43" parent="11" name="userid">
       <Position>1</Position>
       <DataType>int|0s</DataType>
     </column>
-    <column id="38" parent="10" name="cartstring">
+    <column id="44" parent="11" name="cartstring">
       <Position>2</Position>
       <DataType>varchar|0s</DataType>
     </column>

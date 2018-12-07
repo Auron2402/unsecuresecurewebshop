@@ -116,14 +116,16 @@ def secure__get_id_for_name(name):
     return secureid
 
 
-# def secure__check_pw_insecure_id(id, pw):
-#     cursor = get_cursor()
-#     cursor.execute('SELECT password FROM user WHERE insecure_id = ?', [id])
-#     try:
-#         pw_hash = cursor.fetchall()[0][0]
-#     except IndexError:
-#         return False
-#     return sha256_crypt.verify(pw + id, pw_hash)
+def get_secure_id_for_insecure_id(id):
+    cursor = get_cursor()
+    cursor.execute('SELECT secure_id FROM user WHERE insecure_id = ?', [id])
+    result = cursor.fetchall()
+    try:
+        return result[0][0]
+    except IndexError as e:
+        print(e.with_traceback())
+        return -1
+
 
 def check_pw_secure_id(id, pw):
     if app.config["sql_injection_login"] == "secure":
@@ -170,7 +172,7 @@ class User(UserMixin):
     @classmethod
     def get_user_instance(cls, id):
         cursor = get_cursor()
-        cursor.execute('SELECT name, first_name, last_name, adress, mail, role FROM user WHERE secure_id = ?', [id])
+        cursor.execute('SELECT name, first_name, last_name, adress, mail, role, insecure_id FROM user WHERE secure_id = ?', [id])
         result = []
         try:
             result = cursor.fetchall()[0]
@@ -182,9 +184,10 @@ class User(UserMixin):
         adress = result[3]
         mail = result[4]
         role = result[5]
-        return User(id=id, name=name, firstname=firstname, lastname=lastname, adress=adress, mail=mail, role=role)
+        insecure_id = result[6]
+        return User(id=id, name=name, firstname=firstname, lastname=lastname, adress=adress, mail=mail, role=role, insecure_id=insecure_id)
 
-    def __init__(self, id, name, firstname, lastname, adress, mail, role):
+    def __init__(self, id, name, firstname, lastname, adress, mail, role, insecure_id):
         self.id = id
         self.name = name
         self.first_name = firstname
@@ -192,6 +195,7 @@ class User(UserMixin):
         self.adress = adress
         self.mail = mail
         self.role = role
+        self.insecure_id = insecure_id
 
     def __repr__(self):
         return "%d/%s" % (self.id, self.name)
@@ -237,7 +241,7 @@ class CompleteUserForm(Form):
 def userprofile():
     form = CompleteUserForm(request.form)
     if request.method == 'POST':
-        save_profile(form)
+        save_profile(form, current_user.id)
     if app.config["email_template_handling"] == "insecure":
         emailstring = render_template_string("nice email: " + current_user.mail)
     else:
@@ -245,7 +249,7 @@ def userprofile():
     return render_template("user/profile.html", form=form, emailstring=emailstring)
 
 
-def save_profile(form):
+def save_profile(form, id):
     cursor = get_cursor()
     cursor.execute("UPDATE user SET "
                    "name = ?,"
@@ -253,14 +257,14 @@ def save_profile(form):
                    "first_name = ?,"
                    "last_name = ?,"
                    "adress = ?"
-                   "WHERE insecure_id = ?",
+                   "WHERE secure_id = ?",
                    [
                        form.username.data,
                        form.mail.data,
                        form.first_name.data,
                        form.last_name.data,
                        form.adress.data,
-                       form.insecure_id.data
+                       id
                    ])
 
 
@@ -277,7 +281,21 @@ def login():
             return redirect(url_for('login'))
         login_user(user, remember=form.remember.data)
         return redirect(url_for('index'))
-    return render_template('user/login.html', title='Sign In', form=form)
+    return render_template('user/login.html', title='Anmelden', form=form)
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = CompleteUserForm(request.form)
+    if request.method == "POST" and form.validate():
+        insecure_id = gen_complete_user(form.username.data, form.password.data, form.mail.data, form.first_name.data, form.last_name.data, form.adress.data, "user")
+        secure_id = get_secure_id_for_insecure_id(insecure_id)
+        user = User.get_user_instance(secure_id)
+        login_user(user)
+        return redirect(url_for('index'))
+    return render_template('user/register.html', title='Registrieren', form=form)
 
 
 @app.route("/logout")
@@ -304,14 +322,14 @@ def ctf_admin_panel():
         return redirect(url_for('index'))
 
 
-@app.route('/ctf/flag', methods=['POST'])
-def check_flag():
-    flag = request.form['flag']
-    # data = request.data
+@app.route('/ctf/flag/<string:flag>')
+def check_flag(flag):
     cursor = get_admin_cursor()
     cursor.execute('SELECT id FROM main.flag where flag = ?', [flag])
     result = cursor.fetchall()
-    return result
+    if len(result) > 0:
+        return jsonify(True)
+    return jsonify(False)
 
 
 @app.route('/ctf/admin/<string:secure_id>/delete')
@@ -320,6 +338,17 @@ def ctf_admin_delete_user(secure_id):
     cursor = get_cursor()
     cursor.execute('DELETE FROM user WHERE secure_id = ?', [secure_id])
     return redirect(request.referrer)
+
+
+@app.route('/admin/shopadmin')
+@login_required
+def admin_flag_panel():
+    isadmin = False
+    if current_user.role == 'shopadmin':
+        isadmin = True
+    else:
+        isadmin = False
+    return render_template('admin/shopadmin.html', isadmin=isadmin, flags=active_flags)
 
 
 @app.route('/index')
@@ -423,7 +452,7 @@ def insecure__checkout():
     totalprice = 0
     for item in result:
         totalprice = item[4]
-    return render_template("user/checkout.html", totalprice=totalprice, scam_noticed=scam_noticed)
+    return render_template("user/checkout.html", totalprice=totalprice, scam_noticed=scam_noticed, cart_flag=app.config['cart_flag'])
 
 
 @app.route('/user/checkout')
@@ -481,7 +510,6 @@ app.config["secret_key_handling"] = "secure"
 aufgabenstellung = {
     "itemtype_handling": "Ich bin schon überrascht wie dynamisch dieser Shop seine Produktkategorie Seiten generiert, ob man das ausnutzen kann um an andere daten zu kommen?",
     "cart_negative_quantity_handling": "Irgendwie finde ich es unfair das Shops nur Produkte verkaufen. Was wenn ich vielleicht auch ein unglaublich gutes Angebot habe?",
-    "user_id_handling": "Grüße gehen raus an meinen Bruder, der mir die Autoincrement funktion in SQLITE gezeigt hat. Jetzt muss ich immerhin nicht mehr jeden User eine eigene Zahl geben.",
     "sql_injection_login": "Ab sofort speichern wir alle passwörter als md5 hashes ab. Dadurch kann man die passwörter nicht mehr lesen und man kann uns nicht mehr mit sqlinjections hacken, WIN WIN!",
     "email_template_handling": "Wir bauen aktuell ziemlich fancy E-Mail Templates. Deshalb wurde vorübergehend die E-Mail bestätigung deaktiviert. Wir zeigen dir trotzdem die verknüpfte E-Mail an.",
     "secret_key_handling": "Zum glück sind Python Sessions verschlüsselt, so kann man auch Kritische informationen an den User senden und damit weiterarbeiten"
@@ -498,9 +526,6 @@ tipps = {
         "kann man diesen cookie etwa auf eine art decoden? das encoding sieht schon sehr simpel aus",
         "vermutlich besteht es aus einer item id und einer anzahl",
         "vielleicht kann man einfach die anzahl negativ setzten um auf einen negativen gesamtpreis zu kommen"
-    ],
-    "user_id_handling": [
-        "tipps1", "tipps2", "tipps3", "tipps4"
     ],
     "sql_injection_login": [
         "md5 hashing ist zwar besser als nichts, aber sollte man trotzdem nicht wirklich machen",
@@ -524,34 +549,176 @@ tipps = {
 }
 active_aufgabenstellung = {}
 active_tipps = {}
+active_flags = {}
 
 
 @app.route('/ctf/admin/changemode/<string:mode>')
 @login_required
 def ctf_admin_change_mode(mode):
     if current_user.role == 'admin':
-        # set global variable
-        if app.config[mode] == "secure":
-            app.config[mode] = "insecure"
-        elif app.config[mode] == "insecure":
-            app.config[mode] = "secure"
-
-        # activate given mode
-        if app.config[mode] == "insecure":
-            active_tipps[mode] = tipps[mode]
-            active_aufgabenstellung[mode] = aufgabenstellung[mode]
-        elif app.config[mode] == 'secure':
-            active_tipps.pop(mode)
-            active_aufgabenstellung.pop(mode)
-
-        # call special functions for special cases
-        if mode == "secret_key_handling":
-            if app.config['secret_key_handling'] == "secure":
-                harden_secret_key()
-            else:
-                loosen_secret_key()
-
+        toggle_config_variable(mode)
+        toggle_shown_tipps(mode)
+        toggle_flags(mode)
+        toggle_risks(mode)
         return json.jsonify(app.config[mode])
+
+
+def hide_itemtype_flag():
+    admincursor = get_admin_cursor()
+    admincursor.execute('SELECT flag FROM flag WHERE id = 1')
+    hideflag = admincursor.fetchall()[0][0]
+    cursor = get_cursor()
+    cursor.execute('INSERT INTO flag (flag) VALUES (?)', [hideflag])
+
+
+def remove_itemtype_flag():
+    admincursor = get_admin_cursor()
+    admincursor.execute('SELECT flag FROM flag WHERE id = 1')
+    hideflag = admincursor.fetchall()[0][0]
+    cursor = get_cursor()
+    cursor.execute('DELETE FROM flag WHERE flag = ?', [hideflag])
+
+
+def hide_cart_negative_quantity_flag():
+    admincursor = get_admin_cursor()
+    admincursor.execute('SELECT flag FROM flag WHERE id = 2')
+    hideflag = admincursor.fetchall()[0][0]
+    app.config['cart_flag'] = hideflag
+
+
+def remove_cart_negative_quantity_flag():
+    app.config['cart_flag'] = 'The flag is in another castle'
+
+
+def hide_sqli_flag():
+    admincursor = get_admin_cursor()
+    admincursor.execute('SELECT flag FROM flag WHERE id = 4')
+    hideflag = admincursor.fetchall()[0][0]
+    active_flags['sqli_flag'] = hideflag
+
+
+def remove_sqli_flag():
+    active_flags.pop('sqli_flag')
+
+
+def hide_email_template_flag():
+    admincursor = get_admin_cursor()
+    admincursor.execute('SELECT flag FROM flag WHERE id = 5')
+    hideflag = admincursor.fetchall()[0][0]
+    app.config['EMAIL_TEMPLATE_FLAG'] = hideflag
+
+
+def remove_email_template_flag():
+    app.config['EMAIL_TEMPLATE_FLAG'] = 'The flag is in another castle'
+
+
+def hide_secret_key_flag():
+    admincursor = get_admin_cursor()
+    admincursor.execute('SELECT flag FROM flag WHERE id = 6')
+    hideflag = admincursor.fetchall()[0][0]
+    active_flags['secret_key_flag'] = hideflag
+
+
+def remove_secret_key_flag():
+    active_flags.pop('secret_key_flag')
+
+
+def hide_flag(mode):
+    if mode == "itemtype_handling":
+        hide_itemtype_flag()
+    elif mode == "cart_negative_quantity_handling":
+        hide_cart_negative_quantity_flag()
+    elif mode == "user_id_handling":
+        pass
+    elif mode == "sql_injection_login":
+        hide_sqli_flag()
+    elif mode == "email_template_handling":
+        hide_email_template_flag()
+    elif mode == "secret_key_handling":
+        hide_secret_key_flag()
+    else:
+        print("DAFQ? Hide_flag_else sollte niemals passieren")
+
+
+def remove_flag(mode):
+    if mode == "itemtype_handling":
+        remove_itemtype_flag()
+    elif mode == "cart_negative_quantity_handling":
+        remove_cart_negative_quantity_flag()
+    elif mode == "user_id_handling":
+        pass
+    elif mode == "sql_injection_login":
+        remove_sqli_flag()
+    elif mode == "email_template_handling":
+        remove_email_template_flag()
+    elif mode == "secret_key_handling":
+        remove_secret_key_flag()
+    else:
+        print("DAFQ? remove_flag_else sollte niemals passieren")
+
+
+def activate_risk(mode):
+    if mode == "itemtype_handling":
+        pass
+    elif mode == "cart_negative_quantity_handling":
+        pass
+    elif mode == "user_id_handling":
+        pass
+    elif mode == "sql_injection_login":
+        pass
+    elif mode == "email_template_handling":
+        pass
+    elif mode == "secret_key_handling":
+        loosen_secret_key()
+    else:
+        print("DAFQ? activate_risk else sollte niemals passieren")
+
+
+def deactivate_risk(mode):
+    if mode == "itemtype_handling":
+        pass
+    elif mode == "cart_negative_quantity_handling":
+        pass
+    elif mode == "user_id_handling":
+        pass
+    elif mode == "sql_injection_login":
+        pass
+    elif mode == "email_template_handling":
+        pass
+    elif mode == "secret_key_handling":
+        harden_secret_key()
+    else:
+        print("DAFQ? deactivate_risk else sollte niemals passieren")
+
+
+def toggle_risks(mode):
+    if app.config[mode] == "insecure":
+        activate_risk(mode)
+    elif app.config[mode] == 'secure':
+        deactivate_risk(mode)
+
+
+def toggle_flags(mode):
+    if app.config[mode] == "insecure":
+        hide_flag(mode)
+    elif app.config[mode] == 'secure':
+        remove_flag(mode)
+
+
+def toggle_shown_tipps(mode):
+    if app.config[mode] == "insecure":
+        active_tipps[mode] = tipps[mode]
+        active_aufgabenstellung[mode] = aufgabenstellung[mode]
+    elif app.config[mode] == 'secure':
+        active_tipps.pop(mode)
+        active_aufgabenstellung.pop(mode)
+
+
+def toggle_config_variable(mode):
+    if app.config[mode] == "secure":
+        app.config[mode] = "insecure"
+    elif app.config[mode] == "insecure":
+        app.config[mode] = "secure"
 
 
 @app.context_processor
@@ -567,7 +734,6 @@ def inject_stage_and_region():
         "sec_settings": {
             "itemtype_handling": app.config["itemtype_handling"],
             "cart_negative_quantity_handling": app.config["cart_negative_quantity_handling"],
-            "user_id_handling": app.config["user_id_handling"],
             "sql_injection_login": app.config["sql_injection_login"],
             "email_template_handling": app.config["email_template_handling"],
             "secret_key_handling": app.config['secret_key_handling']

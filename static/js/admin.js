@@ -12,7 +12,6 @@ $(document).ready(function () {
                 // $("#" + mode + "-button").html('asdf');
                 let id = mode + "-button";
                 document.getElementById(id).textContent = result;
-                console.log('asdf')
             }
         })
     })

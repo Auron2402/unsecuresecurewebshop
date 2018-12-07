@@ -2,10 +2,19 @@
 {% block navigationdrawer %}
     <a class="mdl-navigation__link" href=""></a>
     <span class="mdl-navigation__link">Shop</span>
-    <a class="mdl-navigation__link" href="">Produkte</a>
+    <a class="mdl-navigation__link" href="/shop">Produkte</a>
+    <a class="mdl-navigation__link" href="/shop/phone">Smartphones</a>
+    <a class="mdl-navigation__link" href="/shop/tablet">Tablets</a>
+    <a class="mdl-navigation__link" href="/shop/wear">Smart Watches</a>
+    <a class="mdl-navigation__link" href="/shop/tv">Fernseher</a>
+    <a class="mdl-navigation__link" href="/shop/car">Fahrzeuge</a>
     <div class="android-drawer-separator"></div>
     <span class="mdl-navigation__link">Benutzer</span>
-    <a class="mdl-navigation__link" href="">Profil</a>
+    <a class="mdl-navigation__link" href="/user/cart">Einkaufwagen</a>
+    <a class="mdl-navigation__link" href="/user/profile">Profil</a>
+    <div class="android-drawer-separator"></div>
+    <span class="mdl-navigation__link">Shop Administration</span>
+    <a class="mdl-navigation__link" href="/admin/shopadmin">Adminpanel</a>
 {% endblock %}
 {% block headermenu %}
     <div class="mdl-layout__header-row">
@@ -32,7 +41,8 @@
                 <a class="mdl-navigation__link mdl-typography--text-uppercase" href="/shop/wear">Wear</a>
                 <a class="mdl-navigation__link mdl-typography--text-uppercase" href="/shop/tv">TV</a>
                 <a class="mdl-navigation__link mdl-typography--text-uppercase" href="/shop/car">Auto</a>
-                <a class="mdl-navigation__link" href="/user/cart"><i class="material-icons mdl-badge mdl-badge--overlap" id="carticon" >shopping_cart</i></a>
+                <a class="mdl-navigation__link" href="/user/cart"><i class="material-icons mdl-badge mdl-badge--overlap"
+                                                                     id="carticon">shopping_cart</i></a>
                 <a class="mdl-navigation__link" href="/user/profile">{{ current_user.name }}<i class="material-icons">person</i></a>
             </nav>
         </div>
@@ -44,10 +54,10 @@
         <div class="logo-font android-sub-slogan">Aber wir legen mindestens 70 % wert auf Sicherheit, vielleicht sogar
             mehr.
         </div>
-        <div class="logo-font android-create-character">
-            <a href=""><img src="../static/images/andy.png">Die restlichen Prozent wurden für diese süßen Androiden
-                verbraucht.</a>
-        </div>
+{#        <div class="logo-font android-create-character">#}
+{#            <a href=""><img src="../static/images/andy.png">Die restlichen Prozent wurden für diese süßen Androiden#}
+{#                verbraucht.</a>#}
+{#        </div>#}
 
         <a href="#screens">
             <button class="android-fab mdl-button mdl-button--colored mdl-js-button mdl-button--fab mdl-js-ripple-effect">
@@ -62,41 +72,53 @@
         <a name="screens"></a>
         <div class="mdl-typography--display-1-color-contrast">Wir haben alle Größen</div>
         <div class="android-screens">
-            <div class="android-wear android-screen">
-                <a class="android-image-link" href="/shop/wear">
-                    <img class="android-screen-image" src="../static/images/wear-silver-on.png">
-                    <img class="android-screen-image" src="../static/images/wear-black-on.png">
-                </a>
-                <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Sehr
-                    klein</a>
-            </div>
-            <div class="android-phone android-screen">
-                <a class="android-image-link" href="/shop/phone">
-                    <img class="android-screen-image" src="../static/images/nexus6-on.jpg">
-                </a>
-                <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase"
-                   href="">Klein</a>
-            </div>
-            <div class="android-tablet android-screen">
-                <a class="android-image-link" href="/shop/tablet">
-                    <img class="android-screen-image" src="../static/images/nexus9-on.jpg">
-                </a>
-                <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase"
-                   href="">Mittel</a>
-            </div>
-            <div class="android-tv android-screen">
-                <a class="android-image-link" href="/shop/tv">
-                    <img class="android-screen-image" src="../static/images/tv-on.jpg">
-                </a>
-                <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Große
-                    Bildschirme</a>
-            </div>
-            <div class="android-auto android-screen">
-                <a class="android-image-link" href="/shop/car">
-                    <img class="android-screen-image" src="../static/images/auto-on.jpg">
-                </a>
-                <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase mdl-typography--text-left"
-                   href="">Was macht dieses Auto hier?</a>
+            <div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--2-col">
+                    <div class="android-wear android-screen">
+                        <a class="android-image-link" href="/shop/wear">
+                            <img class="android-screen-image" src="../static/images/wear-silver-on.png">
+                            <img class="android-screen-image" src="../static/images/wear-black-on.png">
+                        </a>
+                        <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Sehr
+                            klein</a>
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--2-col">
+                    <div class="android-phone android-screen">
+                        <a class="android-image-link" href="/shop/phone">
+                            <img class="android-screen-image" src="../static/images/nexus6-on.jpg">
+                        </a>
+                        <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase"
+                           href="">Klein</a>
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--2-col">
+                    <div class="android-tablet android-screen">
+                        <a class="android-image-link" href="/shop/tablet">
+                            <img class="android-screen-image" src="../static/images/nexus9-on.jpg">
+                        </a>
+                        <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase"
+                           href="">Mittel</a>
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--3-col">
+                    <div class="android-tv android-screen">
+                        <a class="android-image-link" href="/shop/tv">
+                            <img class="android-screen-image" src="../static/images/tv-on.jpg">
+                        </a>
+                        <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase" href="">Große
+                            Bildschirme</a>
+                    </div>
+                </div>
+                <div class="mdl-cell mdl-cell--3-col">
+                    <div class="android-auto android-screen">
+                        <a class="android-image-link" href="/shop/car">
+                            <img class="android-screen-image" src="../static/images/auto-on.jpg">
+                        </a>
+                        <a class="android-link mdl-typography--font-regular mdl-typography--text-uppercase mdl-typography--text-left"
+                           href="">Was macht dieses Auto hier?</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

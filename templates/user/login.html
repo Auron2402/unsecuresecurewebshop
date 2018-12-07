@@ -45,7 +45,21 @@
                     {{ render_csrf_protect() }}
                 </div>
                 <div class="mdl-card__actions mdl-card--border">
-                    <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Log in</button>
+                    <div class="mdl-grid">
+                        <div class="mdl-cell mdl-cell--6-col">
+                            <a href="/register">
+                                <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect"
+                                        type="button">Register
+                                </button>
+                            </a>
+                        </div>
+                        <div class="mdl-cell mdl-cell--6-col">
+                            <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">Log in
+                            </button>
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
         </form>

@@ -9,7 +9,7 @@
             <div class="mdl-card__supporting-text">
                 {{ render_current_user_mail(form.mail, value=current_user.mail) }}
                 {{ render_current_user_name(form.username, value=current_user.name) }}
-                {{ render_current_user_first_name(form.username, value=current_user.first_name) }}
+                {{ render_current_user_first_name(form.first_name, value=current_user.first_name) }}
                 {{ render_current_user_last_name(form.last_name, value=current_user.last_name) }}
                 {{ render_current_user_adress(form.adress, value=current_user.adress) }}
                 {{ render_csrf_protect() }}

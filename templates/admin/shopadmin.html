@@ -1,0 +1,25 @@
+{% extends "index.html" %}
+{% block topblock %}
+    {% if isadmin == True %}
+            <div class="alert alert-success" role="alert">
+                <i class="material-icons">warning</i>
+                Hallo Admin! Folgende Flaggen habe ich für dich gefunden:
+            </div>
+        {% for theme, flag in flags.items() %}
+            <div class="alert alert-success" role="alert">
+                <i class="material-icons">warning</i>
+                <p>Thema: {{ theme }}</p>
+                <p>Flagge: {{ flag }}</p>
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-danger" role="alert">
+            <i class="material-icons">error</i>
+            Du bist ja gar nicht "admin", geh in den Shop zurück. Nur "admin" darf hier rein!
+        </div>
+    {% endif %}
+{% endblock %}
+{% block middleblock %}
+{% endblock %}
+{% block bottomblock %}
+{% endblock %}

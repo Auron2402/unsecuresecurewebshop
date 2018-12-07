@@ -10,7 +10,7 @@
         {% if totalprice < 0 %}
             <h1>Du hast gerade einen Gewinn von {{ format_price(totalprice) }} gemacht.</h1>
             <h2>Wir Zahlen leider nur in Flaggen.</h2>
-            <h3>HIER KÖNNTE IHRE FLAGGE STEHEN</h3>
+            <h3>{{ cart_flag }}</h3>
         {% endif %}
         {% if totalprice > 0 %}
             <h1>Hier wäre der Checkout, du hättest {{ format_price(totalprice) }} ausgegeben.</h1>

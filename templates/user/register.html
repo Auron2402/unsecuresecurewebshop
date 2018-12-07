@@ -1,0 +1,55 @@
+{% extends "index.html" %}
+{% from "form_template/_formhelpers.html" import render_textfield, render_csrf_protect, render_current_user_mail, render_current_user_adress, render_current_user_last_name, render_current_user_first_name, render_current_user_name %}
+{% block topblock %}
+    {% if current_user.is_authenticated %}
+        <div>
+            <p>Hi {{ current_user.name }}</p>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class=flashes>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+        </div>
+    {% endif %}
+
+    {% if current_user.is_anonymous %}
+        <div class="mdl-card mdl-shadow--2dp card__v-profile">
+            <form action="/register" method="post">
+                <div class="mdl-card__title">
+                    <h4 class="mdl-card__title-text">Profil</h4>
+                </div>
+                <div class="mdl-card__supporting-text">
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            <span class="">
+                                {{ messages[0] }}
+                            </span>
+                        {% endif %}
+                    {% endwith %}
+                    {{ render_current_user_mail(form.mail) }}
+                    {{ render_current_user_name(form.username) }}
+                    {{ render_textfield(form.password) }}
+                    {{ render_current_user_first_name(form.first_name) }}
+                    {{ render_current_user_last_name(form.last_name) }}
+                    {{ render_current_user_adress(form.adress) }}
+                    {{ render_csrf_protect() }}
+                </div>
+                <div class="mdl-card__actions">
+                    <button id="profile-save"
+                            class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp"
+                            value="{{ current_user.id }}">Registrieren
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    {% endif %}
+{% endblock %}
+{% block middleblock %}
+{% endblock %}
+{% block bottomblock %}
+{% endblock %}
