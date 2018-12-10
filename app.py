@@ -125,7 +125,11 @@ def insecure__get_id_for_name(name):
     """
     cursor = get_cursor()
     cursor.execute('SELECT insecure_id FROM user WHERE name = ?', [name.lower()])
-    return cursor.fetchall()[0][0]
+    try:
+        return cursor.fetchall()[0][0]
+    except IndexError as e:
+        print(e.__str__())
+    return -1
 
 
 def secure__get_id_for_name(name):
@@ -343,6 +347,12 @@ def save_profile(form, id):
     :param id:
     :return: None
     """
+
+    if app.config['user_id_handling'] == 'insecure':
+        columname = 'insecure_id'
+    else:
+        columname = 'secure_id'
+
     cursor = get_cursor()
     cursor.execute("UPDATE user SET "
                    "name = ?,"
@@ -350,7 +360,7 @@ def save_profile(form, id):
                    "first_name = ?,"
                    "last_name = ?,"
                    "adress = ?"
-                   "WHERE secure_id = ?",
+                   f"WHERE {columname} = ?",
                    [
                        form.username.data,
                        form.mail.data,
@@ -1070,7 +1080,6 @@ def inject_stage_and_region():
     def format_price(amount):
         """
         Funktion um einen Integer ct betrag zu nehmen und diesen als 00,00 € anzuzeigen um Rundungsfehler von kommazahlen zu vermeiden.
-
         :param amount:
         :return: 543 -> 5,43 €
         """
@@ -1079,7 +1088,6 @@ def inject_stage_and_region():
         number_pre = str(whole).split(".")[0]
         return number_pre + "," + number_after + " €"
 
-    l = "l"
     return {
         "sec_settings": {
             "itemtype_handling": app.config["itemtype_handling"],

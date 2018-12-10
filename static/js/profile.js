@@ -1,11 +1,11 @@
-let dialog = document.querySelector('.profile-dialog');
-let showModalButton = document.querySelector('.show-modal');
-if (!dialog.showModal) {
-    dialogPolyfill.registerDialog(dialog);
+let profiledialog = document.querySelector('.profile-dialog');
+let profileshowModalButton = document.querySelector('.show-modal');
+if (!profiledialog.showModal) {
+    dialogPolyfill.registerDialog(profiledialog);
 }
-showModalButton.addEventListener('click', function () {
-    dialog.showModal();
+profileshowModalButton.addEventListener('click', function () {
+    profiledialog.showModal();
 });
-dialog.querySelector('.close').addEventListener('click', function () {
-    dialog.close();
+profiledialog.querySelector('.close').addEventListener('click', function () {
+    profiledialog.close();
 });
