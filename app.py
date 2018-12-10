@@ -1,4 +1,7 @@
 import hashlib
+import os
+import shutil
+
 import flask_debugtoolbar
 import json
 import pylibmc
@@ -52,11 +55,12 @@ app.wtf_csrf_secret_key = 'apow389paw3z5ap385awp35zapwoehpcbykls3478tz'
 csrf.init_app(app)
 handling = ""
 
-SESSION_TYPE = 'memcached'
-sess = Session()
-app.config['SESSION_TYPE'] = "filesystem"
-sess.init_app(app)
-mc = pylibmc.Client(["127.0.0.1"], binary=True, behaviors={"tcp_nodelay": True, "ketama": True})
+
+# SESSION_TYPE = 'memcached'
+# sess = Session()
+# app.config['SESSION_TYPE'] = "filesystem"
+# sess.init_app(app)
+# mc = pylibmc.Client(["127.0.0.1"], binary=True, behaviors={"tcp_nodelay": True, "ketama": True})
 
 
 # app.config['FLASK_ADMIN_SWATCH'] = 'slate'
@@ -72,7 +76,7 @@ def gen_user(name, passwd):
     pwmd5 = get_md5_bytes(passwd)
     cursor = get_cursor()
     cursor.execute('INSERT INTO user (name, password, salt, secure_id, pw_md5, role) VALUES (?, ?, ?, ?, ?, ?)',
-                   [name, pw_hash, salt, salt, pwmd5, 'user'])
+                   [name.lower(), pw_hash, salt, salt, pwmd5, 'user'])
     return cursor.lastrowid
 
 
@@ -86,7 +90,7 @@ def gen_complete_user(name, password, mail, first_name, last_name, adress, role)
     cursor.execute(
         'INSERT INTO user (name, password, salt, secure_id, pw_md5, role, mail, first_name, last_name, adress) '
         'VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-        [name, pw_hash, salt, salt, pwmd5, role, mail, first_name, last_name, adress])
+        [name.lower(), pw_hash, salt, salt, pwmd5, role, mail, first_name, last_name, adress])
     return cursor.lastrowid
 
 
@@ -101,13 +105,13 @@ def get_md5_bytes(pw):
 
 def insecure__get_id_for_name(name):
     cursor = get_cursor()
-    cursor.execute('SELECT insecure_id FROM user WHERE name = ?', [name])
+    cursor.execute('SELECT insecure_id FROM user WHERE name = ?', [name.lower()])
     return cursor.fetchall()[0][0]
 
 
 def secure__get_id_for_name(name):
     cursor = get_cursor()
-    cursor.execute('SELECT secure_id FROM user WHERE name like ?', [name])
+    cursor.execute('SELECT secure_id FROM user WHERE name = ?', [name.lower()])
     try:
         secureid = cursor.fetchall()[0][0]
     except IndexError as e:
@@ -149,12 +153,14 @@ def insecure__check_pw_secure_id(id, pw):
 
 def secure__check_pw_secure_id(id, pw):
     cursor = get_cursor()
-    cursor.execute('SELECT password FROM user WHERE secure_id = ?', [id])
+    cursor.execute('SELECT password, salt FROM user WHERE secure_id = ?', [id])
+    result = cursor.fetchall()
     try:
-        pw_hash = cursor.fetchall()[0][0]
-    except IndexError:
+        pw_hash = result[0][0]
+        pw_salt = result[0][1]
+    except IndexError as e:
         return False
-    return sha256_crypt.verify(pw + id, pw_hash)
+    return sha256_crypt.verify(pw + pw_salt, pw_hash)
 
 
 # def secure__check_pw_name(name, pw):
@@ -171,8 +177,16 @@ def secure__check_pw_secure_id(id, pw):
 class User(UserMixin):
     @classmethod
     def get_user_instance(cls, id):
-        cursor = get_cursor()
-        cursor.execute('SELECT name, first_name, last_name, adress, mail, role, insecure_id FROM user WHERE secure_id = ?', [id])
+        if app.config['user_id_handling'] == 'insecure':
+            cursor = get_cursor()
+            cursor.execute(
+                'SELECT name, first_name, last_name, adress, mail, role, insecure_id, secure_id FROM user WHERE insecure_id = ?',
+                [id])
+        else:
+            cursor = get_cursor()
+            cursor.execute(
+                'SELECT name, first_name, last_name, adress, mail, role, insecure_id, secure_id FROM user WHERE secure_id = ?',
+                [id])
         result = []
         try:
             result = cursor.fetchall()[0]
@@ -185,9 +199,11 @@ class User(UserMixin):
         mail = result[4]
         role = result[5]
         insecure_id = result[6]
-        return User(id=id, name=name, firstname=firstname, lastname=lastname, adress=adress, mail=mail, role=role, insecure_id=insecure_id)
+        secure_id = result[7]
+        return User(id=id, name=name, firstname=firstname, lastname=lastname, adress=adress, mail=mail, role=role,
+                    insecure_id=insecure_id, secure_id=secure_id)
 
-    def __init__(self, id, name, firstname, lastname, adress, mail, role, insecure_id):
+    def __init__(self, id, name, firstname, lastname, adress, mail, role, insecure_id, secure_id):
         self.id = id
         self.name = name
         self.first_name = firstname
@@ -196,6 +212,7 @@ class User(UserMixin):
         self.mail = mail
         self.role = role
         self.insecure_id = insecure_id
+        self.secure_id = secure_id
 
     def __repr__(self):
         return "%d/%s" % (self.id, self.name)
@@ -274,9 +291,12 @@ def login():
         return redirect(url_for('index'))
     form = LoginForm(request.form)
     if request.method == "POST" and form.validate():
-        id = secure__get_id_for_name(form.username.data)
+        if app.config['user_id_handling'] == 'insecure':
+            id = insecure__get_id_for_name(form.username.data)
+        else: # user_id_handling == secure
+            id = secure__get_id_for_name(form.username.data)
         user = User.get_user_instance(id)
-        if user is None or not check_pw_secure_id(id=id, pw=form.password.data):
+        if user is None or not check_pw_secure_id(id=user.secure_id, pw=form.password.data):
             flash('Name oder Passwort sind falsch.')
             return redirect(url_for('login'))
         login_user(user, remember=form.remember.data)
@@ -290,7 +310,8 @@ def register():
         return redirect(url_for('index'))
     form = CompleteUserForm(request.form)
     if request.method == "POST" and form.validate():
-        insecure_id = gen_complete_user(form.username.data, form.password.data, form.mail.data, form.first_name.data, form.last_name.data, form.adress.data, "user")
+        insecure_id = gen_complete_user(form.username.data, form.password.data, form.mail.data, form.first_name.data,
+                                        form.last_name.data, form.adress.data, "user")
         secure_id = get_secure_id_for_insecure_id(insecure_id)
         user = User.get_user_instance(secure_id)
         login_user(user)
@@ -338,6 +359,13 @@ def ctf_admin_delete_user(secure_id):
     cursor = get_cursor()
     cursor.execute('DELETE FROM user WHERE secure_id = ?', [secure_id])
     return redirect(request.referrer)
+
+
+@app.route('/ctf/reset')
+def ctf_reset_server():
+    wd = os.getcwd()
+    shutil.copy(wd + '/database/backup_shop', wd + '/database/shop')
+    return redirect(url_for('index'))
 
 
 @app.route('/admin/shopadmin')
@@ -452,7 +480,8 @@ def insecure__checkout():
     totalprice = 0
     for item in result:
         totalprice = item[4]
-    return render_template("user/checkout.html", totalprice=totalprice, scam_noticed=scam_noticed, cart_flag=app.config['cart_flag'])
+    return render_template("user/checkout.html", totalprice=totalprice, scam_noticed=scam_noticed,
+                           cart_flag=app.config['cart_flag'])
 
 
 @app.route('/user/checkout')
@@ -463,6 +492,27 @@ def checkout():
     elif app.config["cart_negative_quantity_handling"] == "insecure":
         return insecure__checkout()
     return None
+
+
+@app.route('/user/profile/password-change', methods=['GET', 'POST'])
+@login_required
+def change_pw():
+    form = CompleteUserForm(request.form)
+    if request.method == 'POST':
+        newpw = form.password.data
+        save_pw(newpw, current_user.id)
+        return redirect(url_for('userprofile'))
+    return render_template('user/change-password.html', form=form)
+
+
+def save_pw(pw, id):
+    chars = string.ascii_letters + string.digits
+    size = 16
+    salt = ''.join((random.choice(chars)) for x in range(size))
+    pw_hash = sha256_crypt.encrypt(pw + salt)
+    pwmd5 = get_md5_bytes(pw)
+    cursor = get_cursor()
+    cursor.execute('UPDATE user SET password = ?, salt = ?, pw_md5 = ? WHERE secure_id = ?', [pw_hash, salt, pwmd5, id])
 
 
 def get_item_by_type(itemtype):
@@ -509,10 +559,11 @@ app.config["email_template_handling"] = "secure"
 app.config["secret_key_handling"] = "secure"
 aufgabenstellung = {
     "itemtype_handling": "Ich bin schon überrascht wie dynamisch dieser Shop seine Produktkategorie Seiten generiert, ob man das ausnutzen kann um an andere daten zu kommen?",
-    "cart_negative_quantity_handling": "Irgendwie finde ich es unfair das Shops nur Produkte verkaufen. Was wenn ich vielleicht auch ein unglaublich gutes Angebot habe?",
-    "sql_injection_login": "Ab sofort speichern wir alle passwörter als md5 hashes ab. Dadurch kann man die passwörter nicht mehr lesen und man kann uns nicht mehr mit sqlinjections hacken, WIN WIN!",
+    "cart_negative_quantity_handling": "Irgendwie finde ich es unfair das Shops nur Produkte verkaufen. Was wenn ich vielleicht auch ein unglaublich gutes Angebot habe? Verkauf dem Shop doch mal seine eigenen Produkte.",
+    "sql_injection_login": "Ab sofort speichern wir alle passwörter als md5 hashes ab. Dadurch kann man die passwörter nicht mehr lesen und man kann uns nicht mehr mit sqlinjections hacken, WIN WIN! Oder etwa nicht?",
     "email_template_handling": "Wir bauen aktuell ziemlich fancy E-Mail Templates. Deshalb wurde vorübergehend die E-Mail bestätigung deaktiviert. Wir zeigen dir trotzdem die verknüpfte E-Mail an.",
-    "secret_key_handling": "Zum glück sind Python Sessions verschlüsselt, so kann man auch Kritische informationen an den User senden und damit weiterarbeiten"
+    "secret_key_handling": "Zum glück sind Python Sessions verschlüsselt, so kann man auch Kritische informationen an den User senden und damit weiterarbeiten ohne dass er es mitbekommt",
+    'user_id_handling': ''
 }
 tipps = {
     "itemtype_handling": [
@@ -545,7 +596,10 @@ tipps = {
         "leichtsinnige programmierer speichern informationen in der flask session, kann man diese auslesen?",
         "wenn man einen secret key von flask hat, kann man jederzeit neue cookies generieren die vom server als vertrauenswürdig akzeptiert werden",
         "vielleicht kann man die userId des aktiven users ändern, den cookie richtig signieren und codieren und wieder zurückschicken?"
-    ]
+    ],
+    'user_id_handling': [
+
+    ],
 }
 active_aufgabenstellung = {}
 active_tipps = {}
@@ -736,7 +790,8 @@ def inject_stage_and_region():
             "cart_negative_quantity_handling": app.config["cart_negative_quantity_handling"],
             "sql_injection_login": app.config["sql_injection_login"],
             "email_template_handling": app.config["email_template_handling"],
-            "secret_key_handling": app.config['secret_key_handling']
+            "secret_key_handling": app.config['secret_key_handling'],
+            "user_id_handling": app.config['user_id_handling']
         },
         "tips": active_tipps,
         "format_price": format_price,

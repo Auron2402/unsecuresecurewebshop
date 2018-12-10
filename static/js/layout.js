@@ -11,6 +11,16 @@ dialog.querySelector('.close').addEventListener('click', function () {
 });
 
 $(document).ready(function () {
+    $('#ctf-panel-reset-button').on('click', function (event) {
+        event.preventDefault();
+        let really = window.confirm('Bist du dir Sicher, dass du den Server Zurücksetzten willst?');
+        if(really === true) {
+            location.href = '/ctf/reset'
+        } else {
+            return null
+        }
+    });
+
     $('.tip-button').on('click', function (event) {
         event.preventDefault();
         let index = $(this).data('index');
