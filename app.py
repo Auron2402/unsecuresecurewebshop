@@ -1,10 +1,8 @@
 import hashlib
 import os
 import shutil
-
 import flask_debugtoolbar
 import json
-import pylibmc
 import random
 import sqlite3
 import string
@@ -60,15 +58,15 @@ handling = ""
 # sess = Session()
 # app.config['SESSION_TYPE'] = "filesystem"
 # sess.init_app(app)
-# mc = pylibmc.Client(["127.0.0.1"], binary=True, behaviors={"tcp_nodelay": True, "ketama": True})
-
-
-# app.config['FLASK_ADMIN_SWATCH'] = 'slate'
-# admin = Admin(app, name='unsecuresecurewebshop', template_mode='bootstrap3')
-
 
 # user edit functions
 def gen_user(name, passwd):
+    """
+    Generiere einen User in der Datenbank nur mit Name und Passwort
+    :param name:
+    :param passwd:
+    :return: id des generierten nutzers
+    """
     chars = string.ascii_letters + string.digits
     size = 16
     salt = ''.join((random.choice(chars)) for x in range(size))
@@ -81,6 +79,17 @@ def gen_user(name, passwd):
 
 
 def gen_complete_user(name, password, mail, first_name, last_name, adress, role):
+    """
+    Generiere einen User in der Datenbank mit allen einfügbaren Daten die es gibt
+    :param name:
+    :param password:
+    :param mail:
+    :param first_name:
+    :param last_name:
+    :param adress:
+    :param role:
+    :return: id des generierten Nutzers
+    """
     chars = string.ascii_letters + string.digits
     size = 16
     salt = ''.join((random.choice(chars)) for x in range(size))
@@ -95,6 +104,11 @@ def gen_complete_user(name, password, mail, first_name, last_name, adress, role)
 
 
 def get_md5_bytes(pw):
+    """
+    Hashe das Passwort in md5 und gebe die repräsentierenden Bytes zurück um es anfällig für md5sqlinject anfällig zu machen
+    :param pw:
+    :return: md5 bytes
+    """
     pwhash = hashlib.md5()
     pwhash.update(pw.encode('utf-8'))
     compare = pwhash.digest()
@@ -104,12 +118,22 @@ def get_md5_bytes(pw):
 
 
 def insecure__get_id_for_name(name):
+    """
+    Hole die unsichere Integer ID für gegebenen namen aus db
+    :param name:
+    :return: insecure_id
+    """
     cursor = get_cursor()
     cursor.execute('SELECT insecure_id FROM user WHERE name = ?', [name.lower()])
     return cursor.fetchall()[0][0]
 
 
 def secure__get_id_for_name(name):
+    """
+    Hole sichere random ID für gegebenen namen aus db
+    :param name:
+    :return: secure_id
+    """
     cursor = get_cursor()
     cursor.execute('SELECT secure_id FROM user WHERE name = ?', [name.lower()])
     try:
@@ -121,6 +145,11 @@ def secure__get_id_for_name(name):
 
 
 def get_secure_id_for_insecure_id(id):
+    """
+    Hole für gegebene unsichere User-ID die dazu gehörige sichere User-ID aus DB
+    :param id:
+    :return: secure_id
+    """
     cursor = get_cursor()
     cursor.execute('SELECT secure_id FROM user WHERE insecure_id = ?', [id])
     result = cursor.fetchall()
@@ -132,14 +161,26 @@ def get_secure_id_for_insecure_id(id):
 
 
 def check_pw_secure_id(id, pw):
+    """
+    Verteilungsfunktion für passwortcheck anhand sicherer UserID
+    :param id:
+    :param pw:
+    :return: True || False
+    """
     if app.config["sql_injection_login"] == "secure":
         return secure__check_pw_secure_id(id, pw)
     elif app.config["sql_injection_login"] == "insecure":
         return insecure__check_pw_secure_id(id, pw)
-    return None
+    return False
 
 
 def insecure__check_pw_secure_id(id, pw):
+    """
+    Unsicherer md5-byte passwort vergleich aus der DB anhand sicherer ID mit unsicherem Passwort
+    :param id:
+    :param pw:
+    :return: True || False
+    """
     cursor = get_cursor()
     compare = get_md5_bytes(pw)
     sqlstring = """SELECT insecure_id from user WHERE secure_id = '""" + id + """' AND pw_md5 = '""" + compare + """'"""
@@ -152,6 +193,12 @@ def insecure__check_pw_secure_id(id, pw):
 
 
 def secure__check_pw_secure_id(id, pw):
+    """
+    Sicherer SHA256 passwort vergleich aus der DB anhand sicherer ID
+    :param id:
+    :param pw:
+    :return: True || False
+    """
     cursor = get_cursor()
     cursor.execute('SELECT password, salt FROM user WHERE secure_id = ?', [id])
     result = cursor.fetchall()
@@ -163,20 +210,14 @@ def secure__check_pw_secure_id(id, pw):
     return sha256_crypt.verify(pw + pw_salt, pw_hash)
 
 
-# def secure__check_pw_name(name, pw):
-#     cursor = get_cursor()
-#     cursor.execute('SELECT insecure_id, password FROM user WHERE name = ?', [name])
-#     result = cursor.fetchall()
-#     try:
-#         id = result[0][0]
-#         pw_hash = result[0][1]
-#     except IndexError:
-#         return False
-#     return sha256_crypt.verify(pw + id, pw_hash)
-
 class User(UserMixin):
     @classmethod
     def get_user_instance(cls, id):
+        """
+        Fülle User Konstruktor aus DB auf anhand gegebener unsicherer oder sicherer ID
+        :param id:
+        :return: Initialisierter Nutzer
+        """
         if app.config['user_id_handling'] == 'insecure':
             cursor = get_cursor()
             cursor.execute(
@@ -204,6 +245,19 @@ class User(UserMixin):
                     insecure_id=insecure_id, secure_id=secure_id)
 
     def __init__(self, id, name, firstname, lastname, adress, mail, role, insecure_id, secure_id):
+        """
+        Initialisiere Nutzer
+        self.id ist entweder die unsichere Integer ID oder die sichere random ID, je nach aktiviertem Modus
+        :param id:
+        :param name:
+        :param firstname:
+        :param lastname:
+        :param adress:
+        :param mail:
+        :param role:
+        :param insecure_id:
+        :param secure_id:
+        """
         self.id = id
         self.name = name
         self.first_name = firstname
@@ -220,11 +274,19 @@ class User(UserMixin):
 
 @login_manager.user_loader
 def load_user(user_id):
+    """
+    Benötigte Funktion für flask_login
+    :param user_id:
+    :return: Initialisierter Nutzer
+    """
     return User.get_user_instance(user_id)
 
 
-# from here server functions
+# AB HIER SERVERFUNKTIONEN
 class LoginForm(Form):
+    """
+    Minimales Login Formular
+    """
     username = StringField('Name', [
         validators.DataRequired(),
         validators.Length(min=4, max=25)
@@ -237,6 +299,9 @@ class LoginForm(Form):
 
 
 class CompleteUserForm(Form):
+    """
+    Nutzerformular für alle Fälle außer Login
+    """
     username = StringField('Name', [
         validators.DataRequired(),
         validators.Length(min=4, max=25)
@@ -256,6 +321,11 @@ class CompleteUserForm(Form):
 @app.route('/user/profile', methods=['GET', 'POST'])
 @login_required
 def userprofile():
+    """
+    Falls Post, Speichere Nutzerprofil mit übergebenen Daten,
+    Falls Get, Zeige Nutzerprofil des aktuellen Nutzers
+    :return: Profil Template
+    """
     form = CompleteUserForm(request.form)
     if request.method == 'POST':
         save_profile(form, current_user.id)
@@ -267,6 +337,12 @@ def userprofile():
 
 
 def save_profile(form, id):
+    """
+    Speichere Nutzerprofil in Datenbank ab
+    :param form:
+    :param id:
+    :return: None
+    """
     cursor = get_cursor()
     cursor.execute("UPDATE user SET "
                    "name = ?,"
@@ -287,13 +363,19 @@ def save_profile(form, id):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Falls Eingelogged, Leite auf Index weiter
+    Falls GET Ausgelogged, Zeige loginseite
+    Falls POST Ausgelogged, Überprüfe Login Daten je nach Modus
+    :return: Login Template
+    """
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = LoginForm(request.form)
     if request.method == "POST" and form.validate():
         if app.config['user_id_handling'] == 'insecure':
             id = insecure__get_id_for_name(form.username.data)
-        else: # user_id_handling == secure
+        else:  # user_id_handling == secure
             id = secure__get_id_for_name(form.username.data)
         user = User.get_user_instance(id)
         if user is None or not check_pw_secure_id(id=user.secure_id, pw=form.password.data):
@@ -306,6 +388,11 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """
+    Falls GET, Zeige Registrierungsseite an
+    Falls POST, Erstelle Nutzer für übergebene Informationen aber immer mit der Rolle "USER"
+    :return: Register Template
+    """
     if current_user.is_authenticated:
         return redirect(url_for('index'))
     form = CompleteUserForm(request.form)
@@ -322,6 +409,10 @@ def register():
 @app.route("/logout")
 @login_required
 def logout():
+    """
+    Logout aktuellen Benutzer und redirect nach Index
+    :return:
+    """
     logout_user()
     return redirect(url_for('index'))
 
@@ -329,6 +420,11 @@ def logout():
 @app.route('/ctf/admin', methods=['GET', "POST"])
 @login_required
 def ctf_admin_panel():
+    """
+    Falls GET, Zeige Adminpanel für Modi und Nutzerverwaltung
+    Falls POST, Erstelle neuen User für gegebene Informationen (Rolle anpassbar, nicht wie bei Register)
+    :return: redirect ctf/admin || redirect index
+    """
     if current_user.role == 'admin':
         form = CompleteUserForm(request.form)
         if request.method == 'GET':
@@ -345,6 +441,11 @@ def ctf_admin_panel():
 
 @app.route('/ctf/flag/<string:flag>')
 def check_flag(flag):
+    """
+    überprüfe gegebene Flagge mit datenbank und antworte mit json (da ajax aufruf)
+    :param flag:
+    :return: True || False
+    """
     cursor = get_admin_cursor()
     cursor.execute('SELECT id FROM main.flag where flag = ?', [flag])
     result = cursor.fetchall()
@@ -356,6 +457,11 @@ def check_flag(flag):
 @app.route('/ctf/admin/<string:secure_id>/delete')
 @login_required
 def ctf_admin_delete_user(secure_id):
+    """
+    Lösche user für gegebener sicheren ID (admin delete)
+    :param secure_id:
+    :return: redirect referrer
+    """
     cursor = get_cursor()
     cursor.execute('DELETE FROM user WHERE secure_id = ?', [secure_id])
     return redirect(request.referrer)
@@ -363,6 +469,10 @@ def ctf_admin_delete_user(secure_id):
 
 @app.route('/ctf/reset')
 def ctf_reset_server():
+    """
+    Sete die Datenbank des Servers auf das backup zurück
+    :return: redirect index
+    """
     wd = os.getcwd()
     shutil.copy(wd + '/database/backup_shop', wd + '/database/shop')
     return redirect(url_for('index'))
@@ -371,6 +481,12 @@ def ctf_reset_server():
 @app.route('/admin/shopadmin')
 @login_required
 def admin_flag_panel():
+    """
+    Überprüfe ob Nutzer "Shopadmin" rolle besitzt,
+    Falls JA, Zeige aktive Flaggen an die Shopadmin rechte benötigen
+    Falls NEIN, Zeige keine Flaggen und gebe Fehler als HTML zurück
+    :return: shopadmin Template
+    """
     isadmin = False
     if current_user.role == 'shopadmin':
         isadmin = True
@@ -381,26 +497,48 @@ def admin_flag_panel():
 
 @app.route('/index')
 def index():
+    """
+    Zeige Landingpage
+    :return: index template
+    """
     return render_template('index.html')
 
 
 @app.route('/')
 def hello_world():
+    """
+    Leite auf Landingpage weiter
+    :return: redirect index
+    """
     return redirect(url_for("index"))
 
 
 @app.route('/shop')
 def shop():
+    """
+    Zeige Shop übersicht
+    :return: shop template
+    """
     return render_template('shop/shop.html')
 
 
 @app.route('/shop/<string:itemtype>')
 def generic_shop(itemtype):
+    """
+    zeige generische shopseite für übergebenen url an
+    :param itemtype:
+    :return: generic_shop template
+    """
     items = get_item_by_type(itemtype)
     return render_template('shop/generic_shop.html', items=items)
 
 
 def create_cart_table(dictcart):
+    """
+    Generiere die Einkaufswagentabelle und füge eine "Gesamt" Zeile am ende ein
+    :param dictcart:
+    :return: cart_array
+    """
     cursor = get_cursor()
     result = []
     i = 1
@@ -428,12 +566,20 @@ def create_cart_table(dictcart):
 
 @app.route('/user/cart')
 def show_cart():
+    """
+    Zeige den einkaufswagen der aktuellen Session an (aus cookie geholt)
+    :return: cart template
+    """
     dictcart = reformat_cart()
     result = create_cart_table(dictcart)
     return render_template("user/cart.html", items=result)
 
 
 def reformat_cart():
+    """
+    Formatiere Cart das in Cookie als String Mitgegeben wurde in ein Dictionary um
+    :return: Cart Dictionary
+    """
     cartstring = request.cookies.get('cart')
     cartstring = urllib.parse.unquote(cartstring)
     cart = json.loads(cartstring)
@@ -450,16 +596,28 @@ def reformat_cart():
 
 
 def get_cursor():
+    """
+    Hole Datenbankcursor für shopdatenbank
+    :return: shop-db cursor
+    """
     a = sqlite3.connect('database/shop', isolation_level=None)
     return a.cursor()
 
 
 def get_admin_cursor():
+    """
+    Hole Datenbankcursor für admindatenbank
+    :return: admin-db cursor
+    """
     a = sqlite3.connect('database/admin', isolation_level=None)
     return a.cursor()
 
 
 def secure__checkout():
+    """
+    Checkout des verwendeten einkaufswagen MIT überprüfung ob es Gegenstände mit einer Quantität unter 0 gibt
+    :return: checkout template
+    """
     dictcart = reformat_cart()
     result = create_cart_table(dictcart)
     scam_noticed = 0
@@ -474,6 +632,10 @@ def secure__checkout():
 
 
 def insecure__checkout():
+    """
+    Checkout des verwendeten einkaufswagen OHNE überprüfung
+    :return: checkout Template
+    """
     dictcart = reformat_cart()
     result = create_cart_table(dictcart)
     scam_noticed = 0
@@ -487,6 +649,10 @@ def insecure__checkout():
 @app.route('/user/checkout')
 @login_required
 def checkout():
+    """
+    Verteilungsfunktion für den Checkout
+    :return: checkout template
+    """
     if app.config["cart_negative_quantity_handling"] == "secure":
         return secure__checkout()
     elif app.config["cart_negative_quantity_handling"] == "insecure":
@@ -497,6 +663,11 @@ def checkout():
 @app.route('/user/profile/password-change', methods=['GET', 'POST'])
 @login_required
 def change_pw():
+    """
+    Falls GET, zeige Passwort Feld zum ändern
+    Falls POST, speichere gesendetes Passwort für aktiven account
+    :return: redirect userprofile || changepassword template
+    """
     form = CompleteUserForm(request.form)
     if request.method == 'POST':
         newpw = form.password.data
@@ -506,6 +677,12 @@ def change_pw():
 
 
 def save_pw(pw, id):
+    """
+    Speichere übergebenes Passwort in allen benötigten Formaten in Datenbank ab
+    :param pw:
+    :param id:
+    :return: None
+    """
     chars = string.ascii_letters + string.digits
     size = 16
     salt = ''.join((random.choice(chars)) for x in range(size))
@@ -516,6 +693,11 @@ def save_pw(pw, id):
 
 
 def get_item_by_type(itemtype):
+    """
+    Verteilungsfunktion um Shopseiten je nach URL und aktiven Modus anzuzeigen
+    :param itemtype:
+    :return: generic_shop template
+    """
     if app.config["itemtype_handling"] == "secure":
         return secure__get_item_by_type(itemtype)
     elif app.config["itemtype_handling"] == "insecure":
@@ -524,6 +706,11 @@ def get_item_by_type(itemtype):
 
 
 def secure__get_item_by_type(itemtype):
+    """
+    Hole Waren für übergebenen Typen von Datenbank (sicher)
+    :param itemtype:
+    :return: [i][id, name, filename, price]
+    """
     cursor = get_cursor()
     cursor.execute("SELECT id, name, filename, price FROM items WHERE type = ?;", [itemtype])
     result = cursor.fetchall()
@@ -531,6 +718,11 @@ def secure__get_item_by_type(itemtype):
 
 
 def insecure__get_item_by_type(itemtype):
+    """
+    Hole Waren für übergebenen Typen von Datenbank (unsicher)
+    :param itemtype:
+    :return: [i][id, name, filename, price]
+    """
     cursor = get_cursor()
     cursor.execute("SELECT id, name, filename, price FROM items where type = '%s';" % itemtype)
     result = cursor.fetchall()
@@ -538,11 +730,19 @@ def insecure__get_item_by_type(itemtype):
 
 
 def loosen_secret_key():
+    """
+    Secret Key auf Lesbar stellen und in Session übergeben
+    :return: None
+    """
     app.config['SECRET_KEY'] = 'this_is_a_really_secret_key'
     session['secret_key'] = 'this_is_a_really_secret_key'
 
 
 def harden_secret_key():
+    """
+    Secret Key auf Zufällig stellen und in Session überschreiben
+    :return: None
+    """
     app.config['SECRET_KEY'] = 'oqpi23z9q82z3qr9823zh9oq82zhroq289zhrrrr29r'
     session['secret_key'] = 'the secret key is random and secret this time, sorry'
 
@@ -609,6 +809,11 @@ active_flags = {}
 @app.route('/ctf/admin/changemode/<string:mode>')
 @login_required
 def ctf_admin_change_mode(mode):
+    """
+    Für gedrückten Button jeweiligen Modus aktivieren / deaktivieren
+    :param mode:
+    :return: "secure" || "insecure"
+    """
     if current_user.role == 'admin':
         toggle_config_variable(mode)
         toggle_shown_tipps(mode)
@@ -618,6 +823,10 @@ def ctf_admin_change_mode(mode):
 
 
 def hide_itemtype_flag():
+    """
+    Verstecke Flagge in shoptabelle um sie für UNION SELECT sichtbar zu machen
+    :return: None
+    """
     admincursor = get_admin_cursor()
     admincursor.execute('SELECT flag FROM flag WHERE id = 1')
     hideflag = admincursor.fetchall()[0][0]
@@ -626,6 +835,10 @@ def hide_itemtype_flag():
 
 
 def remove_itemtype_flag():
+    """
+    Entferne Versteckte Flagge aus shoptabelle
+    :return: None
+    """
     admincursor = get_admin_cursor()
     admincursor.execute('SELECT flag FROM flag WHERE id = 1')
     hideflag = admincursor.fetchall()[0][0]
@@ -634,6 +847,10 @@ def remove_itemtype_flag():
 
 
 def hide_cart_negative_quantity_flag():
+    """
+    Speichere Flag in app.config damit das checkout Template diese auslesen kann
+    :return: None
+    """
     admincursor = get_admin_cursor()
     admincursor.execute('SELECT flag FROM flag WHERE id = 2')
     hideflag = admincursor.fetchall()[0][0]
@@ -641,10 +858,18 @@ def hide_cart_negative_quantity_flag():
 
 
 def remove_cart_negative_quantity_flag():
+    """
+    Entferne Flag aus app.config
+    :return: None
+    """
     app.config['cart_flag'] = 'The flag is in another castle'
 
 
 def hide_sqli_flag():
+    """
+    Speichere Flag in active_flags damit das shopadmin panel diese auslesen kann
+    :return: None
+    """
     admincursor = get_admin_cursor()
     admincursor.execute('SELECT flag FROM flag WHERE id = 4')
     hideflag = admincursor.fetchall()[0][0]
@@ -652,10 +877,18 @@ def hide_sqli_flag():
 
 
 def remove_sqli_flag():
+    """
+    Entferne die Flagge aus active_flags
+    :return: None
+    """
     active_flags.pop('sqli_flag')
 
 
 def hide_email_template_flag():
+    """
+    Verstecke Flagge in app.config damit emailtemplate mit {{ config }} darauf zugreifen kann
+    :return: None
+    """
     admincursor = get_admin_cursor()
     admincursor.execute('SELECT flag FROM flag WHERE id = 5')
     hideflag = admincursor.fetchall()[0][0]
@@ -663,10 +896,18 @@ def hide_email_template_flag():
 
 
 def remove_email_template_flag():
+    """
+    Entferne Flagge aus app.config
+    :return: None
+    """
     app.config['EMAIL_TEMPLATE_FLAG'] = 'The flag is in another castle'
 
 
 def hide_secret_key_flag():
+    """
+    Verstecke flagge in active_flags damit admin über shopadmin darauf zugreifen kann
+    :return: None
+    """
     admincursor = get_admin_cursor()
     admincursor.execute('SELECT flag FROM flag WHERE id = 6')
     hideflag = admincursor.fetchall()[0][0]
@@ -674,10 +915,19 @@ def hide_secret_key_flag():
 
 
 def remove_secret_key_flag():
+    """
+    Entferne Flagge aus active_flags
+    :return:
+    """
     active_flags.pop('secret_key_flag')
 
 
 def hide_flag(mode):
+    """
+    Verteilungsfunktion je nach übergebenen Modus um jeweils passende Flagge richtig zu verstecken
+    :param mode:
+    :return: None
+    """
     if mode == "itemtype_handling":
         hide_itemtype_flag()
     elif mode == "cart_negative_quantity_handling":
@@ -695,6 +945,11 @@ def hide_flag(mode):
 
 
 def remove_flag(mode):
+    """
+    Verteilungsfunktion je nach übergebenen Modus um jeweilg passende Flagge wieder zu entfernen
+    :param mode:
+    :return: None
+    """
     if mode == "itemtype_handling":
         remove_itemtype_flag()
     elif mode == "cart_negative_quantity_handling":
@@ -712,6 +967,11 @@ def remove_flag(mode):
 
 
 def activate_risk(mode):
+    """
+    Verteilungsfunktion um jeweilige Lücke einzufügen, da nur Modus wechseln nicht reicht
+    :param mode:
+    :return: None
+    """
     if mode == "itemtype_handling":
         pass
     elif mode == "cart_negative_quantity_handling":
@@ -729,6 +989,11 @@ def activate_risk(mode):
 
 
 def deactivate_risk(mode):
+    """
+    Verteilungsfunktion um jeweilige Lücke wieder zu Stopfen, falls diese nicht mehr benötigt wird
+    :param mode:
+    :return: None
+    """
     if mode == "itemtype_handling":
         pass
     elif mode == "cart_negative_quantity_handling":
@@ -746,6 +1011,11 @@ def deactivate_risk(mode):
 
 
 def toggle_risks(mode):
+    """
+    Toggle um eine Lücke hinzuzufügen / zu entfernen
+    :param mode:
+    :return: None
+    """
     if app.config[mode] == "insecure":
         activate_risk(mode)
     elif app.config[mode] == 'secure':
@@ -753,6 +1023,11 @@ def toggle_risks(mode):
 
 
 def toggle_flags(mode):
+    """
+    Toggle um eine Flagge hinzuzufügen / zu entfernen
+    :param mode:
+    :return: None
+    """
     if app.config[mode] == "insecure":
         hide_flag(mode)
     elif app.config[mode] == 'secure':
@@ -760,6 +1035,11 @@ def toggle_flags(mode):
 
 
 def toggle_shown_tipps(mode):
+    """
+    Toggle um Tipps anzuzeigen / zu verstecken
+    :param mode:
+    :return: None
+    """
     if app.config[mode] == "insecure":
         active_tipps[mode] = tipps[mode]
         active_aufgabenstellung[mode] = aufgabenstellung[mode]
@@ -769,6 +1049,11 @@ def toggle_shown_tipps(mode):
 
 
 def toggle_config_variable(mode):
+    """
+    Toggle um die variablen in app.config zu ändern.
+    :param mode:
+    :return: None
+    """
     if app.config[mode] == "secure":
         app.config[mode] = "insecure"
     elif app.config[mode] == "insecure":
@@ -777,7 +1062,18 @@ def toggle_config_variable(mode):
 
 @app.context_processor
 def inject_stage_and_region():
+    """
+    APP CONTEXT PROCESSOR: Funktionen und Variablen die an alle Templates mit übergeben werden.
+    Hier: Lückensettings, tipps, aufgabenstellungen und format_price funktion
+    :return:
+    """
     def format_price(amount):
+        """
+        Funktion um einen Integer ct betrag zu nehmen und diesen als 00,00 € anzuzeigen um Rundungsfehler von kommazahlen zu vermeiden.
+
+        :param amount:
+        :return: 543 -> 5,43 €
+        """
         frac, whole = math.modf(amount / 100)
         number_after = str(frac).split(".")[1]
         number_pre = str(whole).split(".")[0]
