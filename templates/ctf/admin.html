@@ -95,19 +95,19 @@
                                     Bitte möglichst alle Felder ausfüllen
                                     <form action="/ctf/admin" method="post">
                                         <div id="name">
-                                            {{ render_textfield(form.first_name) }}
-                                            {{ render_textfield(form.last_name) }}
+                                            {{ render_textfield(form.first_name, disabled=True) }}
+                                            {{ render_textfield(form.last_name, disabled=True) }}
                                         </div>
                                         <div id="userdata">
-                                            {{ render_textfield(form.username) }}
-                                            {{ render_textfield(form.password) }}
+                                            {{ render_textfield(form.username, disabled=True) }}
+                                            {{ render_textfield(form.password, disabled=True) }}
                                         </div>
                                         <div id="adresses">
-                                            {{ render_textfield(form.adress) }}
-                                            {{ render_textfield(form.mail) }}
+                                            {{ render_textfield(form.adress, disabled=True) }}
+                                            {{ render_textfield(form.mail, disabled=True) }}
                                         </div>
                                         <div id="role">
-                                            {{ render_textfield(form.role) }}
+                                            {{ render_textfield(form.role, disabled=True) }}
                                             {{ render_csrf_protect() }}
                                         </div>
                                         <div id="next">
