@@ -1,4 +1,4 @@
-#Totally Secure Webshop
+# Totally Secure Webshop
 
 Dieser Webshop beinhaltet (aktuell 5) Sicherheitslücken die je nach Bedarf aktiviert oder deaktiviert werden können.
 Ich empfehle immer nur eine Lücke zu öffnen um nicht ausversehen die Aufgabe über eine andere Lücke zu lösen, da zum Beispiel 2 aufgaben damit gelöst werden sich in den Admin Account einzuloggen.

@@ -1,7 +1,7 @@
-#Original Lösungsweg für das CTF
+# Original Lösungsweg für das CTF
 ## Bitte Nur lesen falls schon gelöst
 
-###Itemtype handling
+### Itemtype handling
 In dieser Aufgabe geht es darum den generischen Shop so zu manipulieren, dass er mehr aus der datenbank anzeigt, als er eigentlich soll.
 
 In der URL sieht man das je nach Produktauswahl sich nur das letzte wort ändert (/shop/phone wird zu /shop/tv). 
@@ -26,7 +26,7 @@ Nun da man den Grundaufbau eines funktionierenden Aufrufs hat kann man dieses nu
 "asdf' UNION SELECT 1, name, 3, 4 FROM 'sql_master" liefert die Tabellennamen zurück, dort sieht man eine flag tabelle.
 "asdf' UNION SELECT 1, flag, 3 4 FROM 'flag" liefert dann die gewünschte flagge zurück.
 
-###Cart negative quantity handling
+### Cart negative quantity handling
 In dieser Aufgabe geht es darum, einen negativen Gesamtbetrag mit dem Einkaufswagen zu erreichen.
 Durch herumspielen mit den Produkten, während man die cookies eingeblendet hat, findet man heraus dass dynamisch in einen "cart" cookie geschrieben wird.
 Dieser Cart-cookie ist codiert aber das ist sehr offensichtlich eine URL-Codierung um zeichenverlust zu vermeiden. 
@@ -38,7 +38,7 @@ Wenn man nun die Zahlen willkürlich abändert und den Warenkorb aktualisiert si
 Durch abändern der Quantität des Produkts im Warenkorb auf einen negativen wert, kommt man so insgesamt auf einen negativen Gesamtbetrag.
 Wenn man nun mit einem negativen Gesamtbetrag den Checkout aufruft, bekommt man die Flagge.
 
-###SQL injection login
+### SQL injection login
 Ohne Tipps und Ohne google ist dies vermutlich die mit abstand schwerste Aufgabe. Mit google und mit den tipps vermutlich die einfachste.
 
 In dieser Aufgabe geht es darum sich Zugang zum Admin Account zu verschaffen. Wenn man die Admin seite aufruft beschwert sich die seite dass man gar nicht "admin" ist. 
@@ -78,7 +78,7 @@ Wenn man nun als Benutzername admin und das oben herausgefundene passwort verwen
 Hier steht dann die Flagge.
 
 
-###Email template handling
+### Email template handling
 Diese aufgabe ist in der "freien Welt" sehr selten aufzufinden. Entweder braucht man eine sehr alte version von php (+ twig) oder flask (+jinja), oder einen sehr fahrlässigen Webentwickler.
 Standardmäßig werden alle Templates escaped außer man lässt es explizit zu. Hierfür verwendet man in php mit twig innerhalb der templatevariable raw als parameter (z. B. {{ var|raw }} ) oder in Flask mit jinja2 render_template_string() anstatt render_template().
 
@@ -94,7 +94,7 @@ Innerhalb dieser konfig sieht man direkt in der Letzten zeile die Flagge.
 Rein theoretisch hat man über eine templateinjection eine komplette shell wenn man weiß wie.
 Dies wird aber für diese Aufgabe nicht benötigt.
 
-###Secret key handling (+ user_id_handling)
+### Secret key handling (+ user_id_handling)
 Diese Aufgabe besteht aus zwei ineinander greifende Sicherheitslücken. 
 Beide sind nur im zusammenhang mit der anderen ausnutzbar.
 Zum einen sollte der Secret Key einer Flask app NIEMALS an einen Nutzer übergeben werden. 
