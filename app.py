@@ -1077,6 +1077,7 @@ def inject_stage_and_region():
     Hier: Lückensettings, tipps, aufgabenstellungen und format_price funktion
     :return:
     """
+
     def format_price(amount):
         """
         Funktion um einen Integer ct betrag zu nehmen und diesen als 00,00 € anzuzeigen um Rundungsfehler von kommazahlen zu vermeiden.
@@ -1086,6 +1087,8 @@ def inject_stage_and_region():
         frac, whole = math.modf(amount / 100)
         number_after = str(frac).split(".")[1]
         number_pre = str(whole).split(".")[0]
+        if number_after == '0':
+            number_after = '00'
         return number_pre + "," + number_after + " €"
 
     return {
@@ -1101,3 +1104,27 @@ def inject_stage_and_region():
         "format_price": format_price,
         "aufgaben": active_aufgabenstellung
     }
+
+
+def get_scoreboard():
+    cursor = get_admin_cursor()
+    cursor.execute('SELECT * FROM scoreboard')
+    return cursor.fetchall()
+
+
+def get_tips():
+    cursor = get_admin_cursor()
+    cursor.execute('SELECT * FROM tips')
+    return cursor.fetchall()
+
+
+@app.route('/scoreboard')
+@login_required
+def render_scoreboard():
+    scoreboard = get_scoreboard()
+    tips = get_tips()
+    return render_template('scoreboard/scoreboard.html', scoreboard=scoreboard, tips=tips)
+
+
+from controller.controller_flag_manager import flag_manager
+app.register_blueprint(flag_manager, url_prefix='/flag_manager')
