@@ -97,8 +97,7 @@ def inject_stage_and_region():
     }
 
 
-from controller.controller_flag_manager import flag_manager, active_tipps, active_aufgabenstellung, active_flags, \
-    get_flag
+from controller.controller_flag_manager import flag_manager, active_tipps, active_aufgabenstellung
 
 app.register_blueprint(flag_manager)
 
