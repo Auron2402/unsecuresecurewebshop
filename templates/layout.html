@@ -100,19 +100,19 @@
     <dialog class="mdl-dialog ctf-panel-dialog">
         <div class="mdl-dialog__content">
             <div class="mdl-grid">
-                <div class="mdl-cell mdl-cell--6-col">
-                    <form id="checkflag-form">
-                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                            <input class="mdl-textfield__input" type="text" pattern="CTF\{.*\}" id="checkflag-input">
-                            <label class="mdl-textfield__label" for="checkflag-input">Flagge überprüfen</label>
-                            <span class="mdl-textfield__error">Flagge muss das Format CTF{IRGENDETWAS} haben</span>
-                        </div>
-                    </form>
-
-                    <div id="flag-result-div">
-
-                    </div>
-                </div>
+                {#                <div class="mdl-cell mdl-cell--6-col">#}
+                {#                    <form id="checkflag-form">#}
+                {#                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">#}
+                {#                            <input class="mdl-textfield__input" type="text" pattern="CTF\{.*\}" id="checkflag-input">#}
+                {#                            <label class="mdl-textfield__label" for="checkflag-input">Flagge überprüfen</label>#}
+                {#                            <span class="mdl-textfield__error">Flagge muss das Format CTF{IRGENDETWAS} haben</span>#}
+                {#                        </div>#}
+                {#                    </form>#}
+                {##}
+                {#                    <div id="flag-result-div">#}
+                {##}
+                {#                    </div>#}
+                {#                </div>#}
                 <div class="mdl-cell mdl-cell--6-col">
                     <p><b>Aufgabe:</b></p>
                     {% for thema, aufgabe in aufgaben.items() %}
@@ -163,6 +163,14 @@
                         <button id="ctf-panel-button" type="button"
                                 class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp">
                             CTF-Admin Bereich
+                        </button>
+                    </a>
+                </div>
+                <div class="mdl-cell mdl-cell--6-col">
+                    <a href="/restart_everything">
+                        <button id="restart_everything" type="button"
+                                class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp">
+                            PUNKTE ZURÜCKSETZEN UND TIMER STARTEN
                         </button>
                     </a>
                 </div>

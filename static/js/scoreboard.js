@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    $('#checkflag-form').on('submit', function (event) {
+        $('#checkflag-form').on('submit', function (event) {
             event.preventDefault();
             let flag = $('#checkflag-input').val();
             $.ajax({
@@ -31,5 +31,31 @@ $(document).ready(function () {
                 }
             })
         });
+
+
+        let timestamp = $('#timestamp').data('timestamp');
+        let startTimestamp = Date.parse(timestamp);
+        let stopwatchInterval, elapsedTime = 0;
+
+
+        setInterval(function () {
+            elapsedTime = Date.now() - startTimestamp;
+            update_time(elapsedTime)
+        }, 1000)
+
     }
 );
+
+var timerValueObj = $("#timer-value");
+
+function update_time(tempTime) {
+    tempTime = Math.floor(tempTime / 1000);
+    let seconds = tempTime % 60;
+    tempTime = Math.floor(tempTime / 60);
+    let minutes = tempTime % 60;
+    tempTime = Math.floor(tempTime / 60);
+    let hours = tempTime % 60;
+
+    var time = hours + " : " + minutes + " : " + seconds;
+    timerValueObj.text(time);
+}
