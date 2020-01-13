@@ -63,30 +63,31 @@
                 CTF-Steuerung Öffnen
             </button>
         </div>
-        <div class="mdl-mini-footer__middle-section">
-            <a class="mdl-typography--font-light" href="#top">
-                Back to Top
-                <i class="material-icons">expand_less</i>
-            </a>
-        </div>
-        {% if current_user.is_authenticated %}
-            <div class="mdl-mini-footer__right-section">
-                <a href="/logout">
-                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                        Log-Out
-                    </button>
+    <div style="width: 50%; text-align: center">
+                <a class="mdl-typography--font-light" href="#top">
+                    Back to Top
+                    <i class="material-icons">expand_less</i>
                 </a>
             </div>
-        {% else %}
-            <div class="mdl-mini-footer__right-section">
-                <a href="/login">
-                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                        Anmelden
-                    </button>
-                </a>
-            </div>
-        {% endif %}
+        <div class="mdl-mini-footer__right-section">
 
+
+            <div>
+                {% if current_user.is_authenticated %}
+                    <a href="/logout">
+                        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                            Log-Out
+                        </button>
+                    </a>
+                {% else %}
+                    <a href="/login">
+                        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                            Anmelden
+                        </button>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
 
     </footer>
     <dialog class="mdl-dialog ctf-panel-dialog">
