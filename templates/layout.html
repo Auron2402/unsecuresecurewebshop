@@ -56,45 +56,37 @@
         {% block bottomblock %}
         {% endblock %}
     </div>
-    <footer class="android-footer mdl-mega-footer">
-        <div class="mdl-mega-footer--top-section">
-            {% if current_user.is_authenticated %}
-                <div class="mdl-mega-footer--right-section">
-                    <a href="/logout">
-                        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                            Log-Out
-                        </button>
-                    </a>
-                </div>
-            {% else %}
-                <div class="mdl-mega-footer--right-section">
-                    <a href="/login">
-                        <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                            Anmelden
-                        </button>
-                    </a>
-                </div>
-            {% endif %}
-            <div class="mdl-mega-footer--left-section">
-                <p class="mdl-typography--font-light">Für Bugs, geklaute Persönliche Daten, falsch erhaltene Waren,
-                    Preisfehler und Diskriminierung gegenüber ihrer Westasiatischen Kaulquappe übernehmen wir keine
-                    Haftung</p>
-            </div>
+    <footer class="android-footer mdl-mini-footer">
+        <div class="mdl-mini-footer__left-section">
+            <button id="ctf-panel-button" type="button"
+                    class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp">
+                CTF-Steuerung Öffnen
+            </button>
         </div>
-        <div class="mdl-mega-footer--middle-section">
-            <div class="mdl-mega-footer--right-section">
-                <a class="mdl-typography--font-light" href="#top">
-                    Back to Top
-                    <i class="material-icons">expand_less</i>
+        <div class="mdl-mini-footer__middle-section">
+            <a class="mdl-typography--font-light" href="#top">
+                Back to Top
+                <i class="material-icons">expand_less</i>
+            </a>
+        </div>
+        {% if current_user.is_authenticated %}
+            <div class="mdl-mini-footer__right-section">
+                <a href="/logout">
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                        Log-Out
+                    </button>
                 </a>
             </div>
-            <div class="mdl-mega-footer--left-section">
-                <button id="ctf-panel-button" type="button"
-                        class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp">
-                    CTF-Steuerung Öffnen
-                </button>
+        {% else %}
+            <div class="mdl-mini-footer__right-section">
+                <a href="/login">
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                        Anmelden
+                    </button>
+                </a>
             </div>
-        </div>
+        {% endif %}
+
 
     </footer>
     <dialog class="mdl-dialog ctf-panel-dialog">
