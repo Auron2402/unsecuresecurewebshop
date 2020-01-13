@@ -1,3 +1,6 @@
+import os
+import shutil
+
 from flask import Blueprint, request, render_template, redirect, url_for
 from flask_login import login_required, current_user
 
@@ -41,3 +44,14 @@ def ctf_admin_delete_user(secure_id):
     cursor = get_cursor()
     cursor.execute('DELETE FROM user WHERE secure_id = ?', [secure_id])
     return redirect(request.referrer)
+
+
+@admin.route('/ctf/reset')
+def ctf_reset_server():
+    """
+    Sete die Datenbank des Servers auf das backup zurück
+    :return: redirect index
+    """
+    wd = os.getcwd()
+    shutil.copy(wd + '/database/backup_shop', wd + '/database/shop')
+    return redirect(url_for('index'))

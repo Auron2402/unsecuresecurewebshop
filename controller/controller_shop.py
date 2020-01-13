@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template
+from flask_login import login_required, current_user
 
 from app import app
+from controller.controller_flag_manager import get_flag
 from controller.misc import get_cursor
 
 shopctrl = Blueprint('shopctrl', __name__)
@@ -62,3 +64,20 @@ def insecure__get_item_by_type(itemtype):
     result = cursor.fetchall()
     return result
 
+
+@shopctrl.route('/admin/shopadmin')
+@login_required
+def admin_flag_panel():
+    """
+    Überprüfe ob Nutzer "Shopadmin" rolle besitzt,
+    Falls JA, Zeige aktive Flaggen an die Shopadmin rechte benötigen
+    Falls NEIN, Zeige keine Flaggen und gebe Fehler als HTML zurück
+    :return: shopadmin Template
+    """
+    isadmin = False
+    if current_user.role == 'shopadmin':
+        isadmin = True
+    else:
+        isadmin = False
+    flag = get_flag(6)
+    return render_template('admin/shopadmin.html', isadmin=isadmin, flags={'admin sitzung': flag})

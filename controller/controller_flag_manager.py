@@ -1,4 +1,4 @@
-from flask import Blueprint, json, redirect, url_for
+from flask import Blueprint, json, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 
 from app import app, session
@@ -387,3 +387,18 @@ def start_everything():
     toggle_all_risks()
     toggle_all_flags()
     return redirect(url_for('index'))
+
+
+@flag_manager.route('/ctf/flag/<string:flag>')
+def check_flag(flag):
+    """
+    überprüfe gegebene Flagge mit datenbank und antworte mit json (da ajax aufruf)
+    :param flag:
+    :return: True || False
+    """
+    cursor = get_admin_cursor()
+    cursor.execute('SELECT id FROM main.flag where flag = ?', [flag])
+    result = cursor.fetchall()
+    if len(result) > 0:
+        return jsonify(True)
+    return jsonify(False)

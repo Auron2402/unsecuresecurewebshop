@@ -1,25 +1,8 @@
-import hashlib
-import os
-import shutil
 import flask_debugtoolbar
-import json
-import random
-import sqlite3
-import string
-import urllib
 import math
 from flask import *
-from flask_login import LoginManager, logout_user, login_required, login_user, UserMixin, current_user
-from flask_session import Session
+from flask_login import LoginManager
 from flask_wtf import CSRFProtect
-from passlib.hash import sha256_crypt
-from wtforms import Form, BooleanField, StringField, PasswordField, validators, IntegerField
-
-# from flask_talisman import Talisman
-# from flask_admin import Admin
-
-# flask variables
-from controller.misc import get_admin_cursor
 
 app = Flask(__name__)
 app.debug = True
@@ -56,50 +39,6 @@ csrf.init_app(app)
 handling = ""
 
 
-@app.route('/ctf/flag/<string:flag>')
-def check_flag(flag):
-    """
-    überprüfe gegebene Flagge mit datenbank und antworte mit json (da ajax aufruf)
-    :param flag:
-    :return: True || False
-    """
-    cursor = get_admin_cursor()
-    cursor.execute('SELECT id FROM main.flag where flag = ?', [flag])
-    result = cursor.fetchall()
-    if len(result) > 0:
-        return jsonify(True)
-    return jsonify(False)
-
-
-@app.route('/ctf/reset')
-def ctf_reset_server():
-    """
-    Sete die Datenbank des Servers auf das backup zurück
-    :return: redirect index
-    """
-    wd = os.getcwd()
-    shutil.copy(wd + '/database/backup_shop', wd + '/database/shop')
-    return redirect(url_for('index'))
-
-
-@app.route('/admin/shopadmin')
-@login_required
-def admin_flag_panel():
-    """
-    Überprüfe ob Nutzer "Shopadmin" rolle besitzt,
-    Falls JA, Zeige aktive Flaggen an die Shopadmin rechte benötigen
-    Falls NEIN, Zeige keine Flaggen und gebe Fehler als HTML zurück
-    :return: shopadmin Template
-    """
-    isadmin = False
-    if current_user.role == 'shopadmin':
-        isadmin = True
-    else:
-        isadmin = False
-    flag = get_flag(6)
-    return render_template('admin/shopadmin.html', isadmin=isadmin, flags={'admin sitzung': flag})
-
-
 @app.route('/index')
 def index():
     """
@@ -120,6 +59,7 @@ def hello_world():
 
 if __name__ == '__main__':
     app.run()
+
 
 @app.context_processor
 def inject_stage_and_region():
@@ -163,16 +103,21 @@ from controller.controller_flag_manager import flag_manager, active_tipps, activ
 app.register_blueprint(flag_manager)
 
 from controller.controller_user_manager import user_manager
+
 app.register_blueprint(user_manager)
 
 from controller.controller_scoreboard import scoreboard
+
 app.register_blueprint(scoreboard)
 
 from controller.controller_admin import admin
+
 app.register_blueprint(admin)
 
 from controller.controller_cart import cart
+
 app.register_blueprint(cart)
 
 from controller.controller_shop import shopctrl
+
 app.register_blueprint(shopctrl)
