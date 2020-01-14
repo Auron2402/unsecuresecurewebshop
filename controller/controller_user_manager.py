@@ -120,24 +120,37 @@ def get_secure_id_for_insecure_id(id):
 def check_pw_secure_id(id, pw):
     """
     Verteilungsfunktion für passwortcheck anhand sicherer UserID
+    0 = passwort falsch
+    1 = nur 1 check geschafft (sql injection)
+    2 = passwort richtig
     :param id:
     :param pw:
-    :return: True || False
+    :return: 0 || 1 || 2
     """
+
     if app.config["sql_injection_login"] == "secure":
-        return secure__check_pw_secure_id(id, pw)
+        if secure__check_pw_secure_id(id, pw):
+            return 2
+        return 0
     elif app.config["sql_injection_login"] == "insecure":
         return insecure__check_pw_secure_id(id, pw)
-    return False
+    return 0
 
 
 def insecure__check_pw_secure_id(id, pw):
     """
     Unsicherer md5-byte passwort vergleich aus der DB anhand sicherer ID mit unsicherem Passwort
+    Sicherheitsstufe (security) erhöht sich wenn ein passwordcheck geschafft wird und bleibt gleich sich wenn nicht geschafft werden
+
+    security 0 = kein check geschafft --> falsches passwort
+    security 1 = nur weiter check geschafft --> sql injection
+    security 2 = beide checks geschafft  --> richtiges passwort
+
     :param id:
     :param pw:
-    :return: True || False
+    :return: 0 || 1 || 2
     """
+    security = 0
     cursor = get_cursor()
     compare = get_md5_bytes(pw)
     sqlstring = """SELECT insecure_id from user WHERE secure_id = '""" + id + """' AND pw_md5 = '""" + compare + """'"""
@@ -145,8 +158,14 @@ def insecure__check_pw_secure_id(id, pw):
     try:
         cursor.fetchall()[0]
     except IndexError as e:
-        return False
-    return True
+        security = -1
+    security = security + 1
+    cursor.execute('SELECT insecure_id from user where secure_id = ? AND pw_md5 = ?', [id, compare])
+    try:
+        cursor.fetchall()[0]
+    except IndexError as e:
+        security = security - 1
+    return security + 1
 
 
 def secure__check_pw_secure_id(id, pw):
@@ -305,11 +324,22 @@ def login():
         else:  # user_id_handling == secure
             id = secure__get_id_for_name(form.username.data)
         user = User.get_user_instance(id)
-        if user is None or not check_pw_secure_id(id=user.secure_id, pw=form.password.data):
-            flash('Name oder Passwort sind falsch.')
-            return redirect(url_for('user_manager.login'))
-        login_user(user, remember=form.remember.data)
-        return redirect(url_for('index'))
+        if user is None:
+            flash("Benutzername existiert nicht!")
+            return redirect(url_for("user_manager.login"))
+        else:
+            passwordstatus = check_pw_secure_id(id=user.secure_id, pw=form.password.data)
+            if passwordstatus == 0:
+                flash('Name oder Passwort sind falsch.')
+                return redirect(url_for('user_manager.login'))
+            elif passwordstatus == 1:
+                return redirect(url_for('user_manager.diggydiggyhole'))
+            elif passwordstatus == 2:
+                login_user(user, remember=form.remember.data)
+                return redirect(url_for('index'))
+            else:
+                flash('Etwas ist verdammt schief gelaufen. Versuchs nochmal?')
+                return redirect(url_for('user_manager.login'))
     return render_template('user/login.html', title='Anmelden', form=form)
 
 
@@ -377,3 +407,8 @@ def save_pw(pw, id):
     pwmd5 = get_md5_bytes(pw)
     cursor = get_cursor()
     cursor.execute('UPDATE user SET password = ?, salt = ?, pw_md5 = ? WHERE secure_id = ?', [pw_hash, salt, pwmd5, id])
+
+
+@user_manager.route('/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig/dig')
+def diggydiggyhole():
+    return render_template("/ctf/diggydiggyhole.html")
