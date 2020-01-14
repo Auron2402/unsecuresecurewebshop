@@ -10,7 +10,7 @@ $(document).ready(function () {
                         $('#flag-result-div').html('<div class="alert alert-success" role="alert">\n' +
                             '  <button type="button" class="close-alert">×</button>\n' +
                             '  <i class="material-icons">warning</i>\n' +
-                            '  Die Flagge ist Korrekt! Glückwunsch' +
+                            '  Glückwunsch, die Flagge ist Korrekt! Alle Verwendeten Sicherheitlücken wurden erkannt und deaktiviert.' +
                             '</div>');
                         $(".close-alert").on('click', function (e) {
                             $(this).parent().remove();

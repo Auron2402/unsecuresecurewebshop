@@ -257,6 +257,7 @@ app.config["user_id_handling"] = "secure"
 app.config["sql_injection_login"] = "secure"
 app.config["email_template_handling"] = "secure"
 app.config["secret_key_handling"] = "secure"
+app.config["scoreboard_visible"] = "invisible"
 aufgabenstellung = {
     "itemtype_handling": "Ich bin schon überrascht wie dynamisch dieser Shop seine Produktkategorie Seiten generiert, ob man das ausnutzen kann um an andere daten zu kommen?",
     "cart_negative_quantity_handling": "Irgendwie finde ich es unfair das Shops nur Produkte verkaufen. Was wenn ich vielleicht auch ein unglaublich gutes Angebot habe? Verkauf dem Shop doch mal seine eigenen Produkte.",
@@ -350,31 +351,28 @@ def get_flag(id):
     return cursor.fetchone()
 
 
-def toggle_all_risks():
-    toggle_risks("itemtype_handling")
-    toggle_risks("cart_negative_quantity_handling")
-    toggle_risks("user_id_handling")
-    toggle_risks("sql_injection_login")
-    toggle_risks("email_template_handling")
-    toggle_risks("secret_key_handling")
+def make_everything_insecure():
+    allmodes = [
+        "itemtype_handling",
+        "cart_negative_quantity_handling",
+        "user_id_handling",
+        "sql_injection_login",
+        "email_template_handling",
+        "secret_key_handling"
+    ]
+    for mode in allmodes:
+        startup_sequence_for_mode(mode)
 
 
-def toggle_all_flags():
-    toggle_flags("itemtype_handling")
-    toggle_flags("cart_negative_quantity_handling")
-    toggle_flags("user_id_handling")
-    toggle_flags("sql_injection_login")
-    toggle_flags("email_template_handling")
-    toggle_flags("secret_key_handling")
+def startup_sequence_for_mode(mode):
+    app.config[mode] = "insecure"
+    toggle_flags(mode)
+    toggle_risks(mode)
 
 
-def toggle_all_config_variables():
-    toggle_config_variable("itemtype_handling")
-    toggle_config_variable("cart_negative_quantity_handling")
-    toggle_config_variable("user_id_handling")
-    toggle_config_variable("sql_injection_login")
-    toggle_config_variable("email_template_handling")
-    toggle_config_variable("secret_key_handling")
+def undo_all_achievements():
+    cursor = get_admin_cursor()
+    cursor.execute('UPDATE scoreboard SET status = false')
 
 
 @flag_manager.route("/restart_everything")
@@ -383,10 +381,70 @@ def start_everything():
     timestamp = datetime.datetime.now()
     cursor = get_admin_cursor()
     cursor.execute("INSERT INTO tester_stats (points, timestamp) VALUES (?, ?)", [0, timestamp])
-    toggle_all_config_variables()
-    toggle_all_risks()
-    toggle_all_flags()
+    make_everything_insecure()
+    undo_all_achievements()
+    app.config["scoreboard_visible"] = "invisible"
     return redirect(url_for('index'))
+
+
+def get_points_for_flag(id):
+    cursor = get_admin_cursor()
+    cursor.execute('SELECT points FROM flag where  id = ?', [id])
+    return cursor.fetchone()[0]
+
+
+def award_points(points):
+    cursor = get_admin_cursor()
+    cursor.execute('SELECT points FROM tester_stats ORDER BY id DESC LIMIT 1')
+    oldpoints = cursor.fetchone()[0]
+    newpoints = oldpoints + points
+    cursor.execute('UPDATE tester_stats SET points = ? WHERE id = (SELECT id FROM (SELECT MAX(id) FROM tester_stats))',
+                   [newpoints])
+
+
+def check_if_points_are_valid(flag_id):
+    scoreboard_id = get_scoreboard_id_for_flag(flag_id)
+    cursor = get_admin_cursor()
+    cursor.execute('SELECT status FROM scoreboard WHERE id = ?', [scoreboard_id])
+    status = cursor.fetchone()[0]
+    if status == 0:
+        return True
+    return False
+
+
+def update_points(flag_id):
+    valid = check_if_points_are_valid(flag_id)
+    if valid:
+        points = get_points_for_flag(flag_id)
+        award_points(points)
+
+
+def get_modes_for_flag_id(flag_id):
+    mode_flag_dict = {
+        1: ["itemtype_handling"],
+        2: ["cart_negative_quantity_handling"],
+        3: ["user_id_handling"],
+        4: ["sql_injection_login"],
+        5: ["email_template_handling"],
+        6: ["secret_key_handling", "user_id_handling"],
+        7: ["scoreboard_visible"]
+    }
+    return mode_flag_dict[flag_id]
+
+
+def disable_variable_flag_and_risk(mode):
+    app.config[mode] = "secure"
+    toggle_flags(mode)
+    toggle_risks(mode)
+
+
+def disable_risk_for_flag(flag_id):
+    modes = get_modes_for_flag_id(flag_id)
+    for mode in modes:
+        if mode == "scoreboard_visible":
+            app.config["scoreboard_visible"] = "visible"
+        else:
+            disable_variable_flag_and_risk(mode)
 
 
 @flag_manager.route('/ctf/flag/<string:flag>')
@@ -398,7 +456,22 @@ def check_flag(flag):
     """
     cursor = get_admin_cursor()
     cursor.execute('SELECT id FROM main.flag where flag = ?', [flag])
-    result = cursor.fetchall()
-    if len(result) > 0:
+    result = cursor.fetchone()
+    if result is not None:
+        update_points(result[0])
+        scoreboard_id = get_scoreboard_id_for_flag(result[0])
+        set_achievement_done_for(scoreboard_id)
+        disable_risk_for_flag(result[0])
         return jsonify(True)
     return jsonify(False)
+
+
+def get_scoreboard_id_for_flag(id):
+    cursor = get_admin_cursor()
+    cursor.execute('SELECT id_scoreboard FROM map_scoreboard_flag WHERE id_flag = ?', [id])
+    return cursor.fetchone()[0]
+
+
+def set_achievement_done_for(id):
+    cursor = get_admin_cursor()
+    cursor.execute('UPDATE scoreboard SET status = true WHERE id = ?', [id])

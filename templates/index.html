@@ -12,11 +12,17 @@
     <span class="mdl-navigation__link">Benutzer</span>
     <a class="mdl-navigation__link" href="/user/cart">Einkaufwagen</a>
     <a class="mdl-navigation__link" href="/user/profile">Profil</a>
+    {% if config['scoreboard_visible'] == "invisible" %}
     <!--
     DIESER KOMMENTAR MUSS GELÖSCHT WERDEN BEVOR WIR DEN SHOP ONLINE STELLEN!!! DER LINK FUNKTIONIERT NOCH, DAHER DARF IHN KEINER FINDEN
 UND WENN IHR SCHON DABEI SEID, VERBRENNT DIESE FLAGGE: CTF{kommentierter_text_ist_nicht_geloescht}
     <a class="mdl-navigation__link" href="/scoreboard">Scoreboard</a>
     -->
+    {% elif config['scoreboard_visible'] == "visible" %}
+    <a class="mdl-navigation__link" href="/scoreboard">Scoreboard</a>
+    {% else %}
+    <a class="mdl-navigation__link" href="/NOPE">DAS SOLLTE NICHT PASSIEREN</a>
+    {% endif %}
     <div class="android-drawer-separator"></div>
     <span class="mdl-navigation__link">Shop Administration</span>
     <a class="mdl-navigation__link" href="/admin/shopadmin">Adminpanel</a>
@@ -46,12 +52,17 @@ UND WENN IHR SCHON DABEI SEID, VERBRENNT DIESE FLAGGE: CTF{kommentierter_text_is
                 <a class="mdl-navigation__link mdl-typography--text-uppercase" href="/shop/wear">Wear</a>
                 <a class="mdl-navigation__link mdl-typography--text-uppercase" href="/shop/tv">TV</a>
                 <a class="mdl-navigation__link mdl-typography--text-uppercase" href="/shop/car">Auto</a>
-                <!--
-DIESER KOMMENTAR MUSS GELÖSCHT WERDEN BEVOR WIR DEN SHOP ONLINE STELLEN!!! DER LINK FUNKTIONIERT NOCH, DAHER DARF IHN KEINER FINDEN
+    {% if config['scoreboard_visible'] == "invisible" %}
+    <!--
+    DIESER KOMMENTAR MUSS GELÖSCHT WERDEN BEVOR WIR DEN SHOP ONLINE STELLEN!!! DER LINK FUNKTIONIERT NOCH, DAHER DARF IHN KEINER FINDEN
 UND WENN IHR SCHON DABEI SEID, VERBRENNT DIESE FLAGGE: CTF{kommentierter_text_ist_nicht_geloescht}
-                <a class="mdl-navigation__link mdl-typography--text-uppercase" href="/shop/scoreboard">Scoreboard</a>
-
--->
+    <a class="mdl-navigation__link" href="/scoreboard">Scoreboard</a>
+    -->
+    {% elif config['scoreboard_visible'] == "visible" %}
+    <a class="mdl-navigation__link" href="/scoreboard">Scoreboard</a>
+    {% else %}
+    <a class="mdl-navigation__link" href="/NOPE">DAS SOLLTE NICHT PASSIEREN</a>
+    {% endif %}
                 <a class="mdl-navigation__link" href="/user/cart"><i class="material-icons mdl-badge mdl-badge--overlap"
                                                                      id="carticon">shopping_cart</i></a>
                 <a class="mdl-navigation__link" href="/user/profile">{{ current_user.name }}<i class="material-icons">person</i></a>

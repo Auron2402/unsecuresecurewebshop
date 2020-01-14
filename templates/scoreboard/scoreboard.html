@@ -1,6 +1,10 @@
 {% extends "index.html" %}
 {% block topblock %}
     <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <div id="flag-result-div">
+            </div>
+        </div>
         <div class="mdl-cell mdl-cell--9-col">
             <ul class="mdl-list mdl-shadow--4dp">
                 {% for i, name, description, status in achievements %}
@@ -33,9 +37,7 @@ mdl-color--light-green-A400
                             <label class="mdl-textfield__label" for="checkflag-input">Flagge überprüfen</label>
                             <span class="mdl-textfield__error">Flagge muss das Format CTF{IRGENDETWAS} haben</span>
                         </div>
-                        <div id="flag-result-div">
 
-                        </div>
                         <div class="mdl-card__actions mdl-card--border">
                             <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
                                 Überprüfen
