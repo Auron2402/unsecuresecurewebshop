@@ -58,6 +58,10 @@ mdl-color--light-green-A400
                     <p id="p-startzeit">Bisher verbrauchte Zeit:
                         <time id="timer-value"></time>
                     </p>
+                    <p>Resets: {{ resets }}</p>
+                    {% if resets > 0 %}
+                    <p><a href="/oldstats">List of Shame</a></p>
+                    {% endif %}
                 </div>
             </div>
             </form>
@@ -67,6 +71,49 @@ mdl-color--light-green-A400
 
 {% endblock %}
 {% block middleblock %}
+    <a id="tip-shop"></a>
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <table class="mdl-data-table mdl-js-data-table mdl-data-table mdl-shadow--2dp fullwidth">
+                <thead>
+                <tr>
+                    <th class="mdl-data-table__cell--non-numeric" style="width: 15%">Aufgabe</th>
+                    <th class="mdl-data-table__cell--non-numeric" style="width: 8%">Kaufen</th>
+                    <th class="mdl-data-table__cell--non-numeric" style="width: 77%">Tip</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for id, name, cost, text, bought in helping %}
+                    <tr>
+
+                        <td class="mdl-data-table__cell--non-numeric">{{ name }}<a id="tip-{{ id }}"></a></td>
+                        <td class="mdl-data-table__cell--non-numeric">
+                            {% if bought == 0 %}
+                                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored buy-tip-button"
+                                        data-id="{{ id }}" data-cost="{{ cost }}">{{ cost }}</button>
+                            {% elif bought == 1 %}
+                                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                                        data-id="{{ id }}" data-cost="{{ cost }}">Gekauft
+                                </button>
+                            {% else %}
+                                FEHLER
+                            {% endif %}
+                        </td>
+                        <td class="mdl-data-table__cell--non-numeric umbruch">
+                            {% if bought == 1 %}
+                                {{ text|safe }}
+                            {% else %}
+                                {% if cost == 1000 %}
+                                    KOMPLETTLÖSUNG FÜR 1.000
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 {% endblock %}
 {% block bottomblock %}
     <script type="text/javascript" src="/static/js/scoreboard.js"></script>

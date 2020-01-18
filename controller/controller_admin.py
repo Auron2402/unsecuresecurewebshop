@@ -6,7 +6,7 @@ from flask_login import login_required, current_user
 
 from controller.controller_user_manager import gen_complete_user
 from controller.forms import CompleteUserForm
-from controller.misc import get_cursor
+from controller.misc import get_cursor, get_admin_cursor
 
 admin = Blueprint('admin', __name__)
 
@@ -55,3 +55,11 @@ def ctf_reset_server():
     wd = os.getcwd()
     shutil.copy(wd + '/database/backup_shop', wd + '/database/shop')
     return redirect(url_for('index'))
+
+
+@admin.route('/oldstats')
+def show_old_stats():
+    cursor = get_admin_cursor()
+    cursor.execute('SELECT id, points, timestamp FROM tester_stats')
+    result = cursor.fetchall()
+    return render_template('admin/oldstats.html', oldstats=result)

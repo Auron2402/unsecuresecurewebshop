@@ -427,6 +427,9 @@ a .android-title {
 .fullwidth {
   width: 100%;
 }
+.umbruch {
+  white-space: normal;
+}
 .center {
   margin-left: auto;
   margin-right: auto;

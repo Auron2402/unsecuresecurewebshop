@@ -32,10 +32,24 @@ $(document).ready(function () {
             })
         });
 
+        $('.buy-tip-button').on('click', function (event) {
+            event.preventDefault();
+            let price = $(this).data('cost');
+            let id = $(this).data('id');
+            console.log('PRICE ' + price + ' id ' + id);
+            $.ajax({
+                method: 'GET',
+                url: '/ctf/buy-help/' + id,
+                success: function (result) {
+                    window.location.href = location.href.split('?')[0] + '?reload=' + id + '#tip-' + id;
+                }
+            })
+        });
+
 
         let timestamp = $('#timestamp').data('timestamp');
         let startTimestamp = Date.parse(timestamp);
-        let stopwatchInterval, elapsedTime = 0;
+        let elapsedTime = 0;
 
 
         setInterval(function () {
@@ -43,10 +57,13 @@ $(document).ready(function () {
             update_time(elapsedTime)
         }, 1000)
 
+
+
+
     }
 );
 
-var timerValueObj = $("#timer-value");
+const timerValueObj = $("#timer-value");
 
 function update_time(tempTime) {
     tempTime = Math.floor(tempTime / 1000);
@@ -56,6 +73,6 @@ function update_time(tempTime) {
     tempTime = Math.floor(tempTime / 60);
     let hours = tempTime % 60;
 
-    var time = hours + " : " + minutes + " : " + seconds;
+    let time = hours + " : " + minutes + " : " + seconds;
     timerValueObj.text(time);
 }
