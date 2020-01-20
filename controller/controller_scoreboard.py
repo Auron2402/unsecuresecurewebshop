@@ -1,5 +1,4 @@
 from flask import Blueprint, render_template, jsonify
-from flask_login import login_required
 
 from controller.misc import get_admin_cursor
 
