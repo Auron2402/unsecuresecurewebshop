@@ -39,10 +39,13 @@ def render_scoreboard():
     achievements = get_scoreboard()
     helping = get_tips()
     testerdata = get_tester_data()
-    points = testerdata[1]
-    timestamp = testerdata[2]
+    if testerdata is not None:
+        points = testerdata[1]
+        timestamp = testerdata[2]
+    else:
+        points = 0
+        timestamp = None
     resets = get_resets()
-
     return render_template('scoreboard/scoreboard.html', achievements=achievements, helping=helping, points=points,
                            timestamp=timestamp, resets=resets)
 
