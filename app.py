@@ -8,7 +8,7 @@ app = Flask(__name__)
 app.debug = True
 app.config['SECRET_KEY'] = 'oqpi23z9q82z3qr9823zh9oq82zhroq289zhrrrr29r'
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
-toolbar = flask_debugtoolbar.DebugToolbarExtension(app)
+# toolbar = flask_debugtoolbar.DebugToolbarExtension(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'user_manager.login'
@@ -57,8 +57,6 @@ def hello_world():
     return redirect(url_for("index"))
 
 
-if __name__ == '__main__':
-    app.run()
 
 
 @app.context_processor
@@ -120,3 +118,7 @@ app.register_blueprint(cart)
 from controller.controller_shop import shopctrl
 
 app.register_blueprint(shopctrl)
+
+
+if __name__ == '__main__':
+    app.run(debug=True)

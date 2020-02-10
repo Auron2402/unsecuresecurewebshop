@@ -92,9 +92,9 @@
         </div>
 
     </footer>
-    <dialog class="mdl-dialog ctf-panel-dialog">
-        <div class="mdl-dialog__content">
-            <div class="mdl-grid">
+{#    <dialog class="mdl-dialog ctf-panel-dialog">#}
+{#        <div class="mdl-dialog__content">#}
+{#            <div class="mdl-grid">#}
                 {#                <div class="mdl-cell mdl-cell--6-col">#}
                 {#                    <form id="checkflag-form">#}
                 {#                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">#}
@@ -108,79 +108,79 @@
                 {##}
                 {#                    </div>#}
                 {#                </div>#}
-                <div class="mdl-cell mdl-cell--6-col">
-                    <p><b>Aufgabe:</b></p>
-                    {% for thema, aufgabe in aufgaben.items() %}
-                        <p>{{ aufgabe }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mdl-cell mdl-cell--6-col">
-                    <table class="mdl-data-table mdl-js-data-table">
-                        <thead>
-                        <tr>
-                            <th class="mdl-data-table__cell--non-numeric">Risikofaktor</th>
-                            <th class="mdl-data-table__cell--non-numeric">Handling</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for mode, value in sec_settings.items() %}
-                            <tr>
-                                <td class="mdl-data-table__cell--non-numeric">{{ mode }}</td>
-                                <td class="mdl-data-table__cell--non-numeric">{{ value }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mdl-cell mdl-cell--6-col">
-                    <p><b>Tipps:</b></p>
-                    {% for thema, tip in tips.items() %}
-                        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored thema-button"
-                                data-index="{{ loop.index }}">
-                            {{ thema }}
-                        </button>
-                        <br>
-                        <div id="thema-{{ loop.index }}" style="display: none;">
-                            {% for ti in tip %}
-                                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored tip-button"
-                                        data-index="{{ loop.index }}" data-thema="{{ thema }}">
-                                    Tipp: {{ loop.index }}
-                                </button>
-                                <div id="{{ thema }}-{{ loop.index }}" style="display: none;">
-                                    {{ ti }}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endfor %}
-                </div>
-                <div class="mdl-cell mdl-cell--6-col">
-                    <a href="/ctf/admin">
-                        <button id="ctf-panel-button" type="button"
-                                class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp">
-                            CTF-Admin Bereich
-                        </button>
-                    </a>
-                </div>
-                <div class="mdl-cell mdl-cell--6-col">
+{#                <div class="mdl-cell mdl-cell--6-col">#}
+{#                    <p><b>Aufgabe:</b></p>#}
+{#                    {% for thema, aufgabe in aufgaben.items() %}#}
+{#                        <p>{{ aufgabe }}</p>#}
+{#                    {% endfor %}#}
+{#                </div>#}
+{#                <div class="mdl-cell mdl-cell--6-col">#}
+{#                    <table class="mdl-data-table mdl-js-data-table">#}
+{#                        <thead>#}
+{#                        <tr>#}
+{#                            <th class="mdl-data-table__cell--non-numeric">Risikofaktor</th>#}
+{#                            <th class="mdl-data-table__cell--non-numeric">Handling</th>#}
+{#                        </tr>#}
+{#                        </thead>#}
+{#                        <tbody>#}
+{#                        {% for mode, value in sec_settings.items() %}#}
+{#                            <tr>#}
+{#                                <td class="mdl-data-table__cell--non-numeric">{{ mode }}</td>#}
+{#                                <td class="mdl-data-table__cell--non-numeric">{{ value }}</td>#}
+{#                            </tr>#}
+{#                        {% endfor %}#}
+{#                        </tbody>#}
+{#                    </table>#}
+{#                </div>#}
+{#                <div class="mdl-cell mdl-cell--6-col">#}
+{#                    <p><b>Tipps:</b></p>#}
+{#                    {% for thema, tip in tips.items() %}#}
+{#                        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored thema-button"#}
+{#                                data-index="{{ loop.index }}">#}
+{#                            {{ thema }}#}
+{#                        </button>#}
+{#                        <br>#}
+{#                        <div id="thema-{{ loop.index }}" style="display: none;">#}
+{#                            {% for ti in tip %}#}
+{#                                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored tip-button"#}
+{#                                        data-index="{{ loop.index }}" data-thema="{{ thema }}">#}
+{#                                    Tipp: {{ loop.index }}#}
+{#                                </button>#}
+{#                                <div id="{{ thema }}-{{ loop.index }}" style="display: none;">#}
+{#                                    {{ ti }}#}
+{#                                </div>#}
+{#                            {% endfor %}#}
+{#                        </div>#}
+{#                    {% endfor %}#}
+{#                </div>#}
+{#                <div class="mdl-cell mdl-cell--6-col">#}
+{#                    <a href="/ctf/admin">#}
+{#                        <button id="ctf-panel-button" type="button"#}
+{#                                class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp">#}
+{#                            CTF-Admin Bereich#}
+{#                        </button>#}
+{#                    </a>#}
+{#                </div>#}
+{#                <div class="mdl-cell mdl-cell--6-col">#}
 {#                    <a href="/restart_everything">#}
 {#                        <button id="restart_everything" type="button"#}
 {#                                class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp">#}
 {#                            PUNKTE ZURÜCKSETZEN UND TIMER STARTEN#}
 {#                        </button>#}
 {#                    </a>#}
-                </div>
-                <div class="mdl-cell mdl-cell--6-col">
-                    <button id="ctf-panel-reset-button" type="button"
-                            class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-                        DB SERVER RESET
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="mdl-dialog__actions mdl-dialog__actions--full-width">
-            <button type="button" class="mdl-button close">Schließen</button>
-        </div>
-    </dialog>
+{#                </div>#}
+{#                <div class="mdl-cell mdl-cell--6-col">#}
+{#                    <button id="ctf-panel-reset-button" type="button"#}
+{#                            class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">#}
+{#                        DB SERVER RESET#}
+{#                    </button>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
+{#        <div class="mdl-dialog__actions mdl-dialog__actions--full-width">#}
+{#            <button type="button" class="mdl-button close">Schließen</button>#}
+{#        </div>#}
+{#    </dialog>#}
 </div>
 <script type="text/javascript" src="/static/js/layout.js"></script>
 </body>
