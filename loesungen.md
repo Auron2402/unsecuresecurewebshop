@@ -134,3 +134,6 @@ Ergebnis:
 
 Wenn man alles richtig gemacht hat, sollte man nun mit dem Admin Account eingeloggt sein und man sollte auf die Shopadmin Seite zugreifen können, welche nur als shopadmin verfügbar ist. Dort befindet sich dann die Flagge.
 
+
+### Scoreboard erreichen
+Es gibt eine Scoreboard URL die im quelltext als Kommentar versteckt ist. Sie befindet sich dort wo auch die anderen anklickbaren links sind. Bei Der url ist auch direkt eine einlösbare Flagge die, wenn eingelöst, danach das Scoreboard auch als anklickbaren Link verfügbar macht.
