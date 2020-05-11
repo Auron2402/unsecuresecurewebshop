@@ -4,8 +4,7 @@
         <h1>Hey hey hey, ganz langsam.</h1>
         <h2>wir kaufen keine Geräte, wir VERKAUFEN!</h2>
         <h3>Ich setzte mal deinen Warenkorb zurück, solange denkst du darüber nach was du gerade verbrochen hast!</h3>
-        <h4>Die jugend heut zutage ...</h4>
-        <script type="text/javascript">$.removeCookie('cart', { path: '/'})</script>
+        <h4>Die Jugend heut zutage ...</h4>
     {% else %}
         {% if totalprice < 0 %}
             <h1>Du hast gerade einen Gewinn von {{ format_price(totalprice) }} gemacht.</h1>
@@ -16,10 +15,11 @@
             <h1>Hier wäre der Checkout, du hättest {{ format_price(totalprice) }} ausgegeben.</h1>
         {% endif %}
         {% if totalprice == 0 %}
-            <h1>Warum nix kaufe wolle? Wir guter Shop, wir nix Pfuschen</h1>
+            <h1>Wenn du etwas kaufen möchtest, musst du auch etwas in den Warenkor legen.</h1>
         {% endif %}
     {% endif %}
 
+        <script type="text/javascript">$.cookie('cart', JSON.stringify([]), { path:"/"});</script>
 
 {% endblock %}
 {% block middleblock %}

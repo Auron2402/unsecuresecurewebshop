@@ -1,0 +1,120 @@
+{% extends "index.html" %}
+{% block topblock %}
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <div id="flag-result-div">
+            </div>
+        </div>
+        <div class="mdl-cell mdl-cell--9-col">
+            <ul class="mdl-list mdl-shadow--4dp">
+                {% for i, name, description, status in achievements %}
+                    <li class="mdl-list__item mdl-list__item--three-line
+{% if status == 1 %}
+mdl-color--light-green-A400
+{% endif %}" style="border-bottom: groove">
+                    <span class="mdl-list__item-primary-content">
+                      <span>{{ name }}</span>
+                      <span class="mdl-list__item-text-body">
+                       {{ description }}
+                      </span>
+                    </span>
+                    </li>
+                {% endfor %}
+
+            </ul>
+
+        </div>
+        <div class="mdl-cell mdl-cell--3-col">
+            <div class="mdl-card mdl-shadow--6dp">
+                <div class="mdl-card__title mdl-color--primary mdl-color-text--white">
+                    <h2 class="mdl-card__title-text">Flaggen Überprüfung</h2>
+                </div>
+                <form id="checkflag-form">
+
+                    <div class="mdl-card__supporting-text">
+                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                            <input class="mdl-textfield__input" type="text" pattern="CTF\{.*\}" id="checkflag-input">
+                            <label class="mdl-textfield__label" for="checkflag-input">Flagge überprüfen</label>
+                            <span class="mdl-textfield__error">Flagge muss das Format CTF{IRGENDETWAS} haben</span>
+                        </div>
+
+                        <div class="mdl-card__actions mdl-card--border">
+                            <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                                Überprüfen
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <br>
+            <div class="mdl-card mdl-shadow--6dp">
+                <div class="mdl-card__title mdl-color--primary mdl-color-text--white">
+                    <h2 class="mdl-card__title-text">Aktueller Stand</h2>
+                </div>
+                <div class="mdl-card__supporting-text">
+                    <meta id="timestamp" data-timestamp="{{ timestamp }}">
+
+                    <p>Aktueller Punktestand: {{ points }}</p>
+                    <p id="p-startzeit">Bisher verbrauchte Zeit:
+                        <time id="timer-value"></time>
+                    </p>
+                    <p>Resets: {{ resets }}</p>
+                    {% if resets > 0 %}
+                    <p><a href="/oldstats">List of Shame</a></p>
+                    {% endif %}
+                </div>
+            </div>
+            </form>
+        </div>
+    </div>
+
+
+{% endblock %}
+{% block middleblock %}
+    <a id="tip-shop"></a>
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--12-col">
+            <table class="mdl-data-table mdl-js-data-table mdl-data-table mdl-shadow--2dp fullwidth">
+                <thead>
+                <tr>
+                    <th class="mdl-data-table__cell--non-numeric" style="width: 15%">Aufgabe</th>
+                    <th class="mdl-data-table__cell--non-numeric" style="width: 8%">Kaufen</th>
+                    <th class="mdl-data-table__cell--non-numeric" style="width: 77%">Tip</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for id, name, cost, text, bought in helping %}
+                    <tr>
+
+                        <td class="mdl-data-table__cell--non-numeric">{{ name }}<a id="tip-{{ id }}"></a></td>
+                        <td class="mdl-data-table__cell--non-numeric">
+                            {% if bought == 0 %}
+                                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored buy-tip-button"
+                                        data-id="{{ id }}" data-cost="{{ cost }}">{{ cost }}</button>
+                            {% elif bought == 1 %}
+                                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                                        data-id="{{ id }}" data-cost="{{ cost }}">Gekauft
+                                </button>
+                            {% else %}
+                                FEHLER
+                            {% endif %}
+                        </td>
+                        <td class="mdl-data-table__cell--non-numeric umbruch">
+                            {% if bought == 1 %}
+                                {{ text|safe }}
+                            {% else %}
+                                {% if cost == 1000 %}
+                                    KOMPLETTLÖSUNG FÜR 1.000
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+{% block bottomblock %}
+    <script type="text/javascript" src="/static/js/scoreboard.js"></script>
+{% endblock %}
