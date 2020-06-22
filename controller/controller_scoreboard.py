@@ -34,48 +34,48 @@ def get_resets():
     return "ERROR"
 
 
-@scoreboard.route('/scoreboard')
-def render_scoreboard():
-    achievements = get_scoreboard()
-    helping = get_tips()
-    testerdata = get_tester_data()
-    if testerdata is not None:
-        points = testerdata[1]
-        timestamp = testerdata[2]
-    else:
-        points = 0
-        timestamp = None
-    resets = get_resets()
-    return render_template('scoreboard/scoreboard.html', achievements=achievements, helping=helping, points=points,
-                           timestamp=timestamp, resets=resets)
-
-
-@scoreboard.route('/ctf/buy-help/<int:help_id>')
-def buy_help(help_id):
-    # get cost for achievement
-    cursor = get_admin_cursor()
-    cursor.execute('SELECT cost FROM tips WHERE id = ?', [help_id])
-    result = cursor.fetchone()
-    if result is None:
-        return jsonify('Cant fetch Price'), 500
-    price = result[0]
-
-    # get points of player
-    cursor.execute('SELECT points FROM tester_stats ORDER BY id DESC LIMIT 1')
-    result = cursor.fetchone()
-    if result is None:
-        return jsonify('Cant fetch Points'), 500
-    oldpoints = result[0]
-
-    # get current player id
-    cursor.execute('SELECT MAX(id) FROM tester_stats')
-    result = cursor.fetchone()
-    if result is None:
-        return jsonify('Cant fetch PlayerID'), 500
-    player_id = result[0]
-
-    # buy help for points (save the transaction in database)
-    new_points = oldpoints - price
-    cursor.execute('UPDATE tester_stats SET points = ? WHERE id = ?', [new_points, player_id])
-    cursor.execute('UPDATE tips SET bought = true WHERE id = ?', [help_id])
-    return jsonify(True), 200
+# @scoreboard.route('/scoreboard')
+# def render_scoreboard():
+#     achievements = get_scoreboard()
+#     helping = get_tips()
+#     testerdata = get_tester_data()
+#     if testerdata is not None:
+#         points = testerdata[1]
+#         timestamp = testerdata[2]
+#     else:
+#         points = 0
+#         timestamp = None
+#     resets = get_resets()
+#     return render_template('scoreboard/scoreboard.html', achievements=achievements, helping=helping, points=points,
+#                            timestamp=timestamp, resets=resets)
+#
+#
+# @scoreboard.route('/ctf/buy-help/<int:help_id>')
+# def buy_help(help_id):
+#     # get cost for achievement
+#     cursor = get_admin_cursor()
+#     cursor.execute('SELECT cost FROM tips WHERE id = ?', [help_id])
+#     result = cursor.fetchone()
+#     if result is None:
+#         return jsonify('Cant fetch Price'), 500
+#     price = result[0]
+#
+#     # get points of player
+#     cursor.execute('SELECT points FROM tester_stats ORDER BY id DESC LIMIT 1')
+#     result = cursor.fetchone()
+#     if result is None:
+#         return jsonify('Cant fetch Points'), 500
+#     oldpoints = result[0]
+#
+#     # get current player id
+#     cursor.execute('SELECT MAX(id) FROM tester_stats')
+#     result = cursor.fetchone()
+#     if result is None:
+#         return jsonify('Cant fetch PlayerID'), 500
+#     player_id = result[0]
+#
+#     # buy help for points (save the transaction in database)
+#     new_points = oldpoints - price
+#     cursor.execute('UPDATE tester_stats SET points = ? WHERE id = ?', [new_points, player_id])
+#     cursor.execute('UPDATE tips SET bought = true WHERE id = ?', [help_id])
+#     return jsonify(True), 200

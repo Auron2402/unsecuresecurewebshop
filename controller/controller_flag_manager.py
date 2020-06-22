@@ -251,12 +251,12 @@ def toggle_config_variable(mode):
 
 
 # secure / insecure variables
-app.config["itemtype_handling"] = "secure"
-app.config["cart_negative_quantity_handling"] = "secure"
-app.config["user_id_handling"] = "secure"
-app.config["sql_injection_login"] = "secure"
-app.config["email_template_handling"] = "secure"
-app.config["secret_key_handling"] = "secure"
+app.config["itemtype_handling"] = "insecure"
+app.config["cart_negative_quantity_handling"] = "insecure"
+app.config["user_id_handling"] = "insecure"
+app.config["sql_injection_login"] = "insecure"
+app.config["email_template_handling"] = "insecure"
+app.config["secret_key_handling"] = "insecure"
 app.config["scoreboard_visible"] = "invisible"
 aufgabenstellung = {
     "itemtype_handling": "Ich bin schon überrascht wie dynamisch dieser Shop seine Produktkategorie Seiten generiert, ob man das ausnutzen kann um an andere daten zu kommen?",
