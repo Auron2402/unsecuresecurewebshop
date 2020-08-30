@@ -6,7 +6,7 @@ from flask_login import UserMixin, login_required, current_user, login_user, log
 from passlib.handlers.sha2_crypt import sha256_crypt
 
 from app import app
-from controller.forms import CompleteUserForm, LoginForm
+from controller.forms import CompleteUserForm, LoginForm, TicketForm
 from controller.misc import get_cursor
 from flask import Blueprint, render_template_string, render_template, redirect, request, url_for, flash
 
@@ -305,6 +305,27 @@ def save_profile(form, id):
                        form.adress.data,
                        id
                    ])
+
+
+@user_manager.route('/user/profile/tickets', methods=['GET', 'POST'])
+@login_required
+def ticket_system():
+    """
+    Post: ticket in db abspeichern, fake admin get aufrufen, auf get weiterleiten
+    GET: tickets abrufen
+    :return: Profil Template
+    """
+    form = TicketForm(request.form)
+    if request.method == 'POST':
+        # ticket in db abspeichern
+        pass
+        # fake admin aufruf
+
+    # tickets holen zum anzeigen
+    cursor = get_cursor()
+    cursor.execute('SELECT * FROM tickets')
+    messages = cursor.fetchall()
+    return render_template("user/ticket_system.html", form=form, messages=messages)
 
 
 @user_manager.route('/login', methods=['GET', 'POST'])

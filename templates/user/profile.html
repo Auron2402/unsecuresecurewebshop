@@ -1,42 +1,66 @@
 {% extends "index.html" %}
 {% from "form_template/_formhelpers.html" import render_current_user_adress, render_current_user_first_name, render_current_user_last_name, render_current_user_mail, render_current_user_name, render_csrf_protect %}
 {% block topblock %}
-    <div class="mdl-card mdl-shadow--2dp card__v-profile">
-        <form action="/user/profile" method="post">
-            <div class="mdl-card__title">
-                <h4 class="mdl-card__title-text">Profil</h4>
+    <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--3-col">
+            <div class="mdl-card mdl-shadow--2dp card__v-profile">
+                <form action="/user/profile" method="post">
+                    <div class="mdl-card__title">
+                        <h4 class="mdl-card__title-text">Profil</h4>
+                    </div>
+                    <div class="mdl-card__supporting-text">
+                        {{ render_current_user_mail(form.mail, value=current_user.mail) }}
+                        {{ render_current_user_name(form.username, value=current_user.name) }}
+                        {{ render_current_user_first_name(form.first_name, value=current_user.first_name) }}
+                        {{ render_current_user_last_name(form.last_name, value=current_user.last_name) }}
+                        {{ render_current_user_adress(form.adress, value=current_user.adress) }}
+                        {{ render_csrf_protect() }}
+                        <button id="confirm_mail" type="button"
+                                class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp show-modal">
+                            E-Mail Bestätigen
+                        </button>
+                        <a href="/user/profile/password-change">
+                            <button id="change_pw" type="button"
+                                    class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp">
+                                Passwort ändern
+                            </button>
+                        </a>
+                    </div>
+                    <div class="mdl-card__actions">
+                        <button id="profile-save"
+                                class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp"
+                                value="{{ current_user.id }}">Save
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="mdl-card__supporting-text">
-                {{ render_current_user_mail(form.mail, value=current_user.mail) }}
-                {{ render_current_user_name(form.username, value=current_user.name) }}
-                {{ render_current_user_first_name(form.first_name, value=current_user.first_name) }}
-                {{ render_current_user_last_name(form.last_name, value=current_user.last_name) }}
-                {{ render_current_user_adress(form.adress, value=current_user.adress) }}
-                {{ render_csrf_protect() }}
-                <button id="confirm_mail" type="button"
-                        class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp show-modal">
-                    E-Mail Bestätigen
-                </button>
-                <a href="/user/profile/password-change">
-                    <button id="change_pw" type="button"
-                            class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp">
-                        Passwort ändern
-                    </button>
-                </a>
+        </div>
+        <div class="mdl-cell mdl-cell--8-col">
+            <div class="mdl-card mdl-shadow--2dp">
+                <form action="/user/profile/tickets" method="GET">
+                    <div class="mdl-card__title">
+                        <h4 class="mdl-card__title-text">Sonderwünsche</h4>
+                    </div>
+                    <div class="mdl-card__supporting-text">
+                        <p>Wir möchten unsere Kundeninteraktion erhöhen. Hierfür haben wir eine art Ticketsystem eingerichtet.
+                            Sie können auf der Seite Nachrichten hinterlassen, welche sich einer unserer Adminstratoren
+                            ansehen wird. </p>
+                    </div>
+                    <div class="mdl-card__actions">
+                        <button id="profile-save"
+                                class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp"
+                                value="{{ current_user.id }}">Ticket System öffnen
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="mdl-card__actions">
-                <button id="profile-save"
-                        class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--colored mdl-shadow--2dp"
-                        value="{{ current_user.id }}">Save
-                </button>
-            </div>
-        </form>
+        </div>
     </div>
-
     <dialog class="mdl-dialog profile-dialog">
         <div class="mdl-dialog__content">
             <p>
-                Der Webshop ist noch nicht so weit entwickelt, aber falls es mal so weit kommt wird es ganz bestimmt super sicher sein.
+                Der Webshop ist noch nicht so weit entwickelt, aber falls es mal so weit kommt wird es ganz bestimmt
+                super sicher sein.
             </p>
             <p>
                 E-Mail: {{ emailstring }}

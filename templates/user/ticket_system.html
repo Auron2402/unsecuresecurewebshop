@@ -1,0 +1,32 @@
+{% extends "index.html" %}
+{% from "form_template/_formhelpers.html" import render_csrf_protect %}
+{% block topblock %}
+    <div class="mdl-grid">
+
+        {% for id, message, sender  in messages %}
+            <div class="mdl-cell mdl-cell--12-col-col chatframe">
+                {% if sender == 0 %}
+                    <div class="talk-bubble tri-right round border right-top">
+                        <div class="talktext">
+                            <p>{{ message|safe }}</p>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="talk-bubble tri-left round border left-top">
+                        <div class="talktext">
+                            <p>{{ message|safe }}</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+
+
+{% endblock %}
+{% block middleblock %}
+{% endblock %}
+{% block bottomblock %}
+    <script src="/static/js/profile.js" type="text/javascript"></script>
+{% endblock %}

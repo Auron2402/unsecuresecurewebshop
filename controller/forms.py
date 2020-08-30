@@ -34,3 +34,10 @@ class CompleteUserForm(Form):
     adress = StringField('Adresse')
     insecure_id = IntegerField('insecure_id')
     role = StringField('Rolle')
+
+
+class TicketForm(Form):
+    """
+    Formular für das Ticketsystem
+    """
+    text = StringField('text')
