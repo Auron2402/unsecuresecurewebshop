@@ -119,6 +119,10 @@ from controller.controller_shop import shopctrl
 
 app.register_blueprint(shopctrl)
 
+from controller.controller_api import api
+
+app.register_blueprint(api)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
