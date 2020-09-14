@@ -1,16 +1,19 @@
 let last_message_id = 0;
 
-$(document).ready(
-    // check for new message every 2 sec
-    async function regular_check_message() {
-        while (true) {
-            // ajax_test();
-            query_messages();
-            await sleep(2000)
-        }
+$(document).ready(function () {
+    regular_check_message()
 
-    }
-);
+    $('#message_input').keyup(function (event) {
+        if (event.key === 'Enter') {
+            //on enter send message
+            let inputfield = $('#message_input')
+            send_message(inputfield.val())
+            //clear input
+            inputfield.val('')
+        }
+    })
+});
+
 
 function query_messages() {
     //get information
@@ -18,7 +21,13 @@ function query_messages() {
             last_message_id: last_message_id
         }, function (data) {
             // if new messages, add to message UI
-            if (data !== []) data.forEach(message => add_message_to_ui(message))
+            if (data !== []) {
+                data.forEach(message => {
+                    add_message_to_ui(message);
+
+                })
+
+            }
 
             // set last message so only new messages will be updated
             let last_message_item = data.pop();
@@ -58,14 +67,21 @@ function add_message_to_ui(messageObject) {
             '</li>';
     }
     // add html to UI
-    $('#chat_message_list').append(message_html)
-
+    let scrolldiv = $('#chat_message_list');
+    scrolldiv.append(message_html)
+    // scroll to last message
+    scrolldiv.animate({scrollTop: scrolldiv.prop('scrollHeight')}, 50);
 }
 
 
 function send_message(text) {
     //send message to db
-
+    $.getJSON('/api/send_message', {
+            message_text: text
+        }, function (data) {
+            console.log(data)
+        }
+    )
     //update chat
     query_messages()
 }
@@ -80,16 +96,15 @@ function formatAMPM(date) {
     return hours + ':' + minutes + ' ' + ampm;
 }
 
+// check for new message every 2 sec
+async function regular_check_message() {
+    // noinspection InfiniteLoopJS
+    while (true) {
+        query_messages();
+        await sleep(1000)
+    }
+}
 
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function ajax_test() {
-    $.getJSON('/api/ajax_test', {
-            a: 42
-        }, function (data) {
-            console.log(data)
-        }
-    )
 }

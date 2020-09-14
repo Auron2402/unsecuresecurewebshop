@@ -28,29 +28,31 @@
     margin-top:5px;width:85%;border-radius:5px;padding:5px;display:flex;
 }
 .msj-rta{
-    float:right;background:whitesmoke;
+    float:right;
+    background:whitesmoke;
+    margin-left: 12%;
 }
 .msj{
     float:left;background:white;
 }
 .frame{
     background:#e0e0de;
-    height:450px;
     overflow:hidden;
     padding:0;
+    height: 100%;
 }
 .frame > div:last-of-type{
-    position:absolute;bottom:5px;width:100%;display:flex;
+    bottom:5px;width:100%;display:flex;
 }
 ul {
     width:100%;
     list-style-type: none;
     padding:18px;
-    position:absolute;
     bottom:32px;
     display:flex;
     flex-direction: column;
-
+    height: 80%;
+    overflow: auto
 }
 .msj:before{
     width: 0;
@@ -88,4 +90,8 @@ input:focus{
 }
 :-moz-placeholder { /* Firefox 18- */
     color: #d4d4d4;
+}
+
+.chatgrid {
+    height: 98%;
 }

@@ -1,14 +1,14 @@
 {% extends "index.html" %}
 {% from "form_template/_formhelpers.html" import render_csrf_protect %}
 {% block topblock %}
-    <div class="mdl-grid">
+    <div class="mdl-grid chatgrid">
     <div class="mdl-cell mdl-cell--3-col"></div>
         <div class="mdl-cell mdl-cell--6-col frame">
             <ul class="mdl-list" id="chat_message_list"></ul>
             <div>
                 <div class="msj-rta macro" style="margin:auto">
                     <div class="text text-r" style="backround:whitesmoke !important;">
-                        <input class="mytext" placeholder="Schreiben Sie hier mit dem Mitarbeiter"/>
+                        <input class="mytext" placeholder="Schreiben Sie hier mit dem Mitarbeiter" id="message_input"/>
                     </div>
                 </div>
             </div>
