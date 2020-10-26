@@ -1,10 +1,11 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, Flask, current_app
 from flask_login import login_required, current_user
 
-from app import app
+#from app import app
 from controller.controller_flag_manager import get_flag
 from controller.misc import get_cursor
 
+app = current_app
 shopctrl = Blueprint('shopctrl', __name__)
 
 

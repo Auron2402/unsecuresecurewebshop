@@ -1,12 +1,13 @@
 import urllib
 
-from flask import Blueprint, render_template, request, json
+from flask import Blueprint, render_template, request, json, Flask, current_app
 from flask_login import login_required
 
-from app import app
+#from app import app
 from controller.controller_flag_manager import get_flag
 from controller.misc import get_cursor
 
+app = current_app
 cart = Blueprint('cart', __name__)
 
 

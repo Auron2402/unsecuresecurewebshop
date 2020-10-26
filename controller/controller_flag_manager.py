@@ -1,9 +1,10 @@
-from flask import Blueprint, json, redirect, url_for, jsonify
+from flask import Blueprint, json, redirect, url_for, jsonify, session, Flask, current_app
 from flask_login import login_required, current_user
 
-from app import app, session
+#from app import app, session
 from controller.misc import get_admin_cursor, get_cursor
 
+app = current_app
 flag_manager = Blueprint('flag_manager', __name__)
 
 
@@ -250,14 +251,7 @@ def toggle_config_variable(mode):
         app.config[mode] = "secure"
 
 
-# secure / insecure variables
-app.config["itemtype_handling"] = "insecure"
-app.config["cart_negative_quantity_handling"] = "insecure"
-app.config["user_id_handling"] = "insecure"
-app.config["sql_injection_login"] = "insecure"
-app.config["email_template_handling"] = "insecure"
-app.config["secret_key_handling"] = "insecure"
-app.config["scoreboard_visible"] = "invisible"
+
 aufgabenstellung = {
     "itemtype_handling": "Ich bin schon überrascht wie dynamisch dieser Shop seine Produktkategorie Seiten generiert, ob man das ausnutzen kann um an andere daten zu kommen?",
     "cart_negative_quantity_handling": "Irgendwie finde ich es unfair das Shops nur Produkte verkaufen. Was wenn ich vielleicht auch ein unglaublich gutes Angebot habe? Verkauf dem Shop doch mal seine eigenen Produkte.",
@@ -306,12 +300,9 @@ active_aufgabenstellung = {}
 active_tipps = {}
 active_flags = {}
 
-"""DIES SIND SETTINGS DAMIT SIE GEFUNDEN KÖNNEN WERDEN"""
-app.config['SECRET_KEY'] = 'this_is_a_really_secret_key'
-app.config['EMAIL_TEMPLATE_FLAG'] = "CTF{templateinjection_ist_awesome_aber_selten}"
 
 
-@app.route('/ctf/admin/changemode/<string:mode>')
+@flag_manager.route('/ctf/admin/changemode/<string:mode>')
 @login_required
 def ctf_admin_change_mode(mode):
     """
