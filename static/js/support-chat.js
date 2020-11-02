@@ -45,9 +45,10 @@ function add_message_to_ui(messageObject) {
     // add time to look more "chaty"
     let date = formatAMPM(new Date());
     let message_html = '';
-
+    let data_div = $('.last_message_sent_by')
     //create html
-    if (sender_id === 0) {
+    console.log(sender_id)
+    if (sender_id === 184) {
         message_html = '<li class="mdl-list__item" style="width:100%;">' +
             '<div class="msj-rta macro">' +
             '<div class="text text-r">' +
@@ -56,6 +57,8 @@ function add_message_to_ui(messageObject) {
             '</div>' +
             '<div class="avatar" style="padding:0px 0px 0px 10px !important"></div>' +
             '</li>';
+        console.log('change data to support');
+        data_div.attr('data-user', 'support');
     } else {
         message_html = '<li class="mdl-list__item" style="width:100%">' +
             '<div class="msj macro">' +
@@ -65,9 +68,12 @@ function add_message_to_ui(messageObject) {
             '</div>' +
             '</div>' +
             '</li>';
+        console.log('change data to user');
+        data_div.attr('data-user', 'user');
     }
     // add html to UI
     let scrolldiv = $('#chat_message_list');
+
     scrolldiv.append(message_html)
     // scroll to last message
     scrolldiv.animate({scrollTop: scrolldiv.prop('scrollHeight')}, 50);
